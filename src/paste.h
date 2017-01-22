@@ -9,7 +9,7 @@
 
 struct pandabin_paste {
     unsigned char * hash;
-    char * content;
+    char * path;
     uuid_t uuid;
     size_t size;
 };
