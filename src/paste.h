@@ -3,14 +3,19 @@
 
 #pragma once
 
+#include "main.h"
+#include "openssl/sha.h"
+#include "uuid/uuid.h"
+
 struct pandabin_paste {
-    uuid_t uuid;
     unsigned char * hash;
     char * content;
+    uuid_t uuid;
+    size_t size;
 };
 
 struct pandabin_paste *
-pandabin_paste_new (char *);
+pandabin_paste_new (const char *, size_t);
 
 void
 pandabin_paste_free (struct pandabin_paste *);
