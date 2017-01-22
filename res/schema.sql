@@ -1,6 +1,6 @@
 create table 'pastes'
   ( 'uuid'    text    primary key
-  , 'content' blob    not null
+  , 'path '   text    not null
   , 'size'    integer not null
   , 'hash'    text    not null
   , 'created' text    not null
