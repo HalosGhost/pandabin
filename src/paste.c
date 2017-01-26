@@ -21,7 +21,7 @@ pandabin_paste_new (const char * content, size_t size) {
         goto cleanup;
     }
 
-    unsigned char * md = SHA256((unsigned char * )content, size,
+    unsigned char * md = SHA256((const unsigned char * )content, size,
                                 pst->hash);
     if ( !md ) {
         syslog(LOG_ERR, "%s: %s\n", "Failed to calculate hash", "unknown");
