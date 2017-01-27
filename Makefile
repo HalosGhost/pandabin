@@ -13,7 +13,7 @@ clean:
 	@rm -rf -- dist cov-int $(PROGNM).tgz make.sh ./src/*.plist
 
 dist:
-	@mkdir -p ./dist/locale
+	@mkdir -p ./dist
 
 gen: clean
 	@tup generate make.sh
