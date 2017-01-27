@@ -7,6 +7,8 @@ main (void) {
     openlog(PROGNM, LOG_CONS, LOG_USER);
     syslog(LOG_INFO, "Started\n");
 
+    goto cleanup;
+
     cleanup:
         syslog(LOG_INFO, "Ended\n");
         closelog();
