@@ -6,12 +6,17 @@
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <syslog.h>
 #include <string.h>
+#include <linux/limits.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 
 #define PROGNM   "pandabin"
 #define PREFIX   "/opt"
-#define DBPATH   PREFIX "/" PROGNM "/db.sqlite"
-#define FILEPATH PREFIX "/" PROGNM "/files"
+#define MAINPATH PREFIX "/" PROGNM
+#define DBPATH   MAINPATH "/db.sqlite"
+#define FILEPATH MAINPATH "/files"
 
 #endif
