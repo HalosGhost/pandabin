@@ -12,6 +12,7 @@
 #include <linux/limits.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <stdbool.h>
 
 #define PROGNM   "pandabin"
 #define PREFIX   "/opt"

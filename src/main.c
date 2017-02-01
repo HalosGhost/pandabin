@@ -22,21 +22,23 @@ main (void) {
 static signed
 dir_init (void) {
 
+    #define FAIL(...) do { \
+        status = errno; \
+        syslog(LOG_ERR, __VA_ARGS__); \
+        goto cleanup; \
+    } while (false)
+
     signed status = EXIT_SUCCESS;
 
     char cwd [PATH_MAX] = "";
     errno = 0;
     if ( !getcwd(cwd, PATH_MAX - 1) ) {
-        status = errno;
-        syslog(LOG_ERR, "Could not store working directory: %s\n", strerror(status));
-        goto cleanup;
+        FAIL("Could not store working directory: %s\n", strerror(status));
     }
 
     errno = 0;
     if ( chdir(PREFIX) == -1 ) {
-        status = errno;
-        syslog(LOG_ERR, "Could not cd to %s: %s\n", PREFIX, strerror(status));
-        goto cleanup;
+        FAIL("Could not cd to %s: %s\n", PREFIX, strerror(status));
     }
 
     errno = 0;
@@ -45,17 +47,13 @@ dir_init (void) {
 
         errno = 0;
         if ( mkdir(MAINPATH, 0777) == -1 ) {
-            status = errno;
-            syslog(LOG_ERR, "Could not create %s: %s\n", MAINPATH, strerror(status));
-            goto cleanup;
+            FAIL("Could not create %s: %s\n", MAINPATH, strerror(status));
         }
 
         syslog(LOG_INFO, "Created %s\n", MAINPATH);
         errno = 0;
         if ( chdir(MAINPATH) == -1 ) {
-            status = errno;
-            syslog(LOG_ERR, "Still Could not cd to %s: %s\n", MAINPATH, strerror(status));
-            goto cleanup;
+            FAIL("Still Could not cd to %s: %s\n", MAINPATH, strerror(status));
         }
     }
 
@@ -65,16 +63,13 @@ dir_init (void) {
 
         errno = 0;
         if ( mkdir(FILEPATH, 0777) == -1 ) {
-            status = errno;
-            syslog(LOG_ERR, "Could not create %s: %s\n", FILEPATH, strerror(status));
-            goto cleanup;
+            FAIL("Could not create %s: %s\n", FILEPATH, strerror(status));
         }
 
         syslog(LOG_INFO, "Created %s\n", FILEPATH);
     }
 
     cleanup:
-
         errno = 0;
         if ( chdir(cwd) == -1 ) {
             status = errno;
