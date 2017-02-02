@@ -22,12 +22,6 @@ main (void) {
 static signed
 dir_init (void) {
 
-    #define FAIL(...) do { \
-        status = errno; \
-        syslog(LOG_ERR, __VA_ARGS__); \
-        goto cleanup; \
-    } while (false)
-
     signed status = EXIT_SUCCESS;
 
     char cwd [PATH_MAX] = "";
