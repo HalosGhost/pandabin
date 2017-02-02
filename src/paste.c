@@ -7,20 +7,17 @@ pandabin_paste_new (const char * content, size_t size) {
 
     struct pandabin_paste * pst = malloc(sizeof(struct pandabin_paste));
     if ( !pst ) {
-        errno = ENOMEM;
         FAIL("%s: %s\n", "Failed to allocate new paste", strerror(status));
     }
 
     pst->hash = malloc(SHA256_DIGEST_LENGTH);
     if ( !pst->hash ) {
-        errno = ENOMEM;
         FAIL("%s: %s\n", "Failed to allocate hash", strerror(status));
     }
 
     unsigned char * md = SHA256((const unsigned char * )content, size,
                                 pst->hash);
     if ( !md ) {
-        errno = EXIT_FAILURE;
         FAIL("%s: %s\n", "Failed to calculate hash", "unknown");
     }
 
@@ -30,7 +27,6 @@ pandabin_paste_new (const char * content, size_t size) {
     size_t pathlen = strlen(FILEPATH) + 39;
     pst->path = malloc(pathlen);
     if ( !pst->path ) {
-        errno = ENOMEM;
         FAIL("%s: %s\n", "Failed to allocate path", strerror(status));
     }
 
@@ -42,14 +38,12 @@ pandabin_paste_new (const char * content, size_t size) {
 
     FILE * f = fopen(pst->path, "w+");
     if ( !f ) {
-        errno = EXIT_FAILURE;
         FAIL("%s: %s\n", "Failed to open file", strerror(status));
     }
 
     fwrite(content, size, 1, f);
     s = fclose(f);
     if ( s ) {
-        errno = EXIT_FAILURE;
         FAIL("%s: %s\n", "Failed to close file", strerror(status));
     }
 
