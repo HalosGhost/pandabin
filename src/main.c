@@ -13,6 +13,9 @@ main (void) {
     status = dir_init();
     if ( status != EXIT_SUCCESS ) { goto cleanup; }
 
+    status = db_init();
+    if ( status != EXIT_SUCCESS ) { goto cleanup; }
+
     cleanup:
         syslog(LOG_INFO, "Ended\n");
         closelog();
