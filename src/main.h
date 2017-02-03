@@ -13,7 +13,6 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <stdbool.h>
-#include "common.h"
 
 #define PROGNM   "pandabin"
 #define PREFIX   "/opt"
