@@ -21,4 +21,10 @@
 #define DBPATH   MAINPATH "/db.sqlite"
 #define FILEPATH MAINPATH "/files"
 
+#define FAIL(...) do { \
+    status = errno; \
+    syslog(LOG_ERR, __VA_ARGS__); \
+    goto cleanup; \
+} while (false)
+
 #endif

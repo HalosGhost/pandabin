@@ -4,7 +4,6 @@
 #pragma once
 
 #include "main.h"
-#include "common.h"
 #include <openssl/sha.h>
 #include <uuid/uuid.h>
 
