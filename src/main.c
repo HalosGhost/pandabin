@@ -70,3 +70,4 @@ dir_init (void) {
             syslog(LOG_ERR, "Could not cd to %s: %s\n", cwd, strerror(status));
         } return status;
 }
+
