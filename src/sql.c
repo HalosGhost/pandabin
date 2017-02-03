@@ -4,7 +4,7 @@ signed
 db_init (void) {
 
     signed status = EXIT_SUCCESS;
-    sqlite3 * db;
+    sqlite3 * db = 0;
 
     status = sqlite3_open(DBPATH, &db);
     if ( status != SQLITE_OK ) {
