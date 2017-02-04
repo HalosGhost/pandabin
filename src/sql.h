@@ -12,7 +12,7 @@ db_init (void);
 static const char * pandabin_schema =
     "create table 'pastes'"
     "  ( 'uuid'    text    primary key"
-    "  , 'path '   text    not null"
+    "  , 'path'    text    not null"
     "  , 'size'    integer not null"
     "  , 'hash'    text    not null"
     "  , 'created' text    not null"
