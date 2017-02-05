@@ -30,37 +30,36 @@ dir_init (void) {
     char cwd [PATH_MAX] = "";
     errno = 0;
     if ( !getcwd(cwd, PATH_MAX - 1) ) {
-        FAIL("Could not store working directory: %s\n", strerror(status));
+        FAIL("Failed to store working directory: %s\n", strerror(status));
     }
 
     errno = 0;
     if ( chdir(PREFIX) == -1 ) {
-        FAIL("Could not cd to %s: %s\n", PREFIX, strerror(status));
+        FAIL("Failed to cd to %s: %s\n", PREFIX, strerror(status));
     }
 
     errno = 0;
     if ( chdir(MAINPATH) == -1 ) {
-        syslog(LOG_INFO, "Could not cd to %s: %s\n", MAINPATH, strerror(errno));
+        syslog(LOG_INFO, "Failed to cd to %s: %s\n", MAINPATH, strerror(errno));
 
         errno = 0;
         if ( mkdir(MAINPATH, 0777) == -1 ) {
-            FAIL("Could not create %s: %s\n", MAINPATH, strerror(status));
-        }
+            FAIL("Failed to create %s: %s\n", MAINPATH, strerror(status));
+        } syslog(LOG_INFO, "Created %s\n", MAINPATH);
 
-        syslog(LOG_INFO, "Created %s\n", MAINPATH);
         errno = 0;
         if ( chdir(MAINPATH) == -1 ) {
-            FAIL("Still Could not cd to %s: %s\n", MAINPATH, strerror(status));
+            FAIL("Failed to cd to %s: %s\n", MAINPATH, strerror(status));
         }
     }
 
     errno = 0;
     if ( chdir(FILEPATH) == -1 ) {
-        syslog(LOG_INFO, "Could not cd to %s: %s\n", FILEPATH, strerror(errno));
+        syslog(LOG_INFO, "Failed to cd to %s: %s\n", FILEPATH, strerror(errno));
 
         errno = 0;
         if ( mkdir(FILEPATH, 0777) == -1 ) {
-            FAIL("Could not create %s: %s\n", FILEPATH, strerror(status));
+            FAIL("Failed to create %s: %s\n", FILEPATH, strerror(status));
         }
 
         syslog(LOG_INFO, "Created %s\n", FILEPATH);
@@ -70,7 +69,7 @@ dir_init (void) {
         errno = 0;
         if ( chdir(cwd) == -1 ) {
             status = errno;
-            syslog(LOG_ERR, "Could not cd to %s: %s\n", cwd, strerror(status));
+            syslog(LOG_ERR, "Failed to cd to %s: %s\n", cwd, strerror(status));
         } return status;
 }
 
