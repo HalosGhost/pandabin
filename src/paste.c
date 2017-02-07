@@ -10,27 +10,35 @@ pandabin_paste_new (const char * content, size_t size) {
         FAIL("%s: %s\n", "Failed to allocate new paste", strerror(status));
     }
 
-    pst->hash = malloc(SHA256_DIGEST_LENGTH);
+    pst->hash = malloc(65);
     if ( !pst->hash ) {
-        FAIL("%s: %s\n", "Failed to allocate hash", strerror(status));
+        FAIL("%s: %s\n", "Failed to allocate hash hexdigest", strerror(status));
     }
 
-    unsigned char * md = SHA256((const unsigned char * )content, size,
-                                pst->hash);
-    if ( !md ) {
+    unsigned char md [SHA256_DIGEST_LENGTH];
+    const unsigned char * t = SHA256((const unsigned char * )content, size, md);
+    if ( !t ) {
         FAIL("%s: %s\n", "Failed to calculate hash", "unknown");
+    }
+
+    signed s = 0;
+    for (size_t i = 0; i < SHA256_DIGEST_LENGTH; ++ i ) {
+        s = snprintf(pst->hash + i * 2, 3, "%02x", md[i]);
+        if ( s < 0 ) {
+            FAIL("Failed to get hexadecimal representation of hash\n");
+        }
     }
 
     uuid_generate(pst->uuid);
     pst->size = size;
 
     size_t pathlen = strlen(FILEPATH) + 5;
-    pst->path = malloc(pathlen + 37);
+    pst->path = malloc(pathlen + 65);
     if ( !pst->path ) {
         FAIL("Failed to allocate path: %s\n", strerror(status));
     }
 
-    signed s = snprintf(pst->path, pathlen, "%s/%.3s", FILEPATH, pst->hash);
+    s = snprintf(pst->path, pathlen, "%s/%.3s", FILEPATH, pst->hash);
     if ( s < 0 ) {
         errno = EXIT_FAILURE;
         FAIL("Failed to store path to subdirectory\n");
@@ -63,7 +71,7 @@ pandabin_paste_new (const char * content, size_t size) {
     }
 
     // `+ 1` and `- 1` to account for the NUL byte
-    s = snprintf(pst->path + pathlen - 1, 37 + 1, "/%s", pst->hash);
+    s = snprintf(pst->path + pathlen - 1, 65 + 1, "/%s", pst->hash);
     if ( s < 0 ) {
         errno = EXIT_FAILURE;
         FAIL("Failed to store path path to file\n");
