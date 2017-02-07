@@ -14,9 +14,10 @@
 #include <sys/types.h>
 #include <stdbool.h>
 #include "sql.h"
+#include "paste.h"
 
 #define PROGNM   "pandabin"
-#define PREFIX   "/opt"
+#define PREFIX   "/home/halosghost"
 #define MAINPATH PREFIX "/" PROGNM
 #define DBPATH   MAINPATH "/db.sqlite"
 #define FILEPATH MAINPATH "/files"

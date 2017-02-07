@@ -3,9 +3,9 @@
 
 #pragma once
 
-#include "main.h"
 #include <openssl/sha.h>
 #include <uuid/uuid.h>
+#include "main.h"
 
 struct pandabin_paste {
     char * hash, * path;

@@ -1,7 +1,7 @@
 #include "sql.h"
 
 signed
-db_init (void) {
+pandabin_db_init (void) {
 
     signed status = EXIT_SUCCESS;
     sqlite3 * db = 0;
@@ -21,4 +21,5 @@ db_init (void) {
         sqlite3_close(db);
         return status == SQLITE_OK ? EXIT_SUCCESS : status;
 }
+
 

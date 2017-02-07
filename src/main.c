@@ -1,7 +1,7 @@
 #include "main.h"
 
 static signed
-dir_init (void);
+pandabin_dir_init (void);
 
 signed
 main (void) {
@@ -10,10 +10,10 @@ main (void) {
     openlog(PROGNM, LOG_CONS, LOG_USER);
     syslog(LOG_INFO, "Started\n");
 
-    status = dir_init();
+    status = pandabin_dir_init();
     if ( status != EXIT_SUCCESS ) { goto cleanup; }
 
-    status = db_init();
+    status = pandabin_db_init();
     if ( status != EXIT_SUCCESS ) { goto cleanup; }
 
     cleanup:
@@ -23,7 +23,7 @@ main (void) {
 }
 
 static signed
-dir_init (void) {
+pandabin_dir_init (void) {
 
     signed status = EXIT_SUCCESS;
 

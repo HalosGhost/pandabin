@@ -3,11 +3,11 @@
 
 #pragma once
 
-#include "main.h"
 #include <sqlite3.h>
+#include "main.h"
 
 signed
-db_init (void);
+pandabin_db_init (void);
 
 static const char * pandabin_schema =
     "create table if not exists 'pastes'"
