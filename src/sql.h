@@ -10,7 +10,7 @@ signed
 db_init (void);
 
 static const char * pandabin_schema =
-    "create table 'pastes'"
+    "create table if not exists 'pastes'"
     "  ( 'uuid'    text    primary key"
     "  , 'path'    text    not null"
     "  , 'size'    integer not null"
@@ -18,7 +18,7 @@ static const char * pandabin_schema =
     "  , 'created' text    not null"
     "  );"
 
-    "create table 'settings'"
+    "create table if not exists 'settings'"
     "  ( 'name'    text    primary key"
     "  , 'value'           not null"
     "  );";
