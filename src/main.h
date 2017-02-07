@@ -17,7 +17,7 @@
 #include "paste.h"
 
 #define PROGNM   "pandabin"
-#define PREFIX   "/home/halosghost"
+#define PREFIX   "/opt"
 #define MAINPATH PREFIX "/" PROGNM
 #define DBPATH   MAINPATH "/db.sqlite"
 #define FILEPATH MAINPATH "/files"
