@@ -1,13 +1,16 @@
-#if !defined(PANDABIN_SQL)
-#define PANDABIN_SQL
+#if !defined(PANDABIN_SQL_H)
+#define PANDABIN_SQL_H
 
 #pragma once
 
 #include <sqlite3.h>
-#include "main.h"
+#include "paste.h"
+
+sqlite3 *
+pandabin_db_init (void);
 
 signed
-pandabin_db_init (void);
+pandabin_db_insert (sqlite3 *, struct pandabin_paste *);
 
 static const char * pandabin_schema =
     "create table if not exists 'pastes'"

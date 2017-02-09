@@ -1,6 +1,6 @@
 #include "sql.h"
 
-signed
+sqlite3 *
 pandabin_db_init (void) {
 
     signed status = EXIT_SUCCESS;
@@ -18,8 +18,21 @@ pandabin_db_init (void) {
     }
 
     cleanup:
-        sqlite3_close(db);
-        return status == SQLITE_OK ? EXIT_SUCCESS : status;
+        if ( status != SQLITE_OK ) {
+            sqlite3_close(db);
+            return NULL;
+        } return db;
 }
 
+signed
+pandabin_db_insert (sqlite3 * db, struct pandabin_paste * pst) {
+
+    signed status = EXIT_SUCCESS;
+
+    (void )db; (void )pst;
+    goto cleanup;
+
+    cleanup:
+        return status;
+}
 
