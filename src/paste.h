@@ -5,7 +5,6 @@
 
 #include <openssl/sha.h>
 #include <uuid/uuid.h>
-#include "main.h"
 
 struct pandabin_paste {
     char * hash, * path;
@@ -18,5 +17,7 @@ pandabin_paste_new (const char *, size_t);
 
 void
 pandabin_paste_free (struct pandabin_paste *);
+
+#include "main.h"
 
 #endif
