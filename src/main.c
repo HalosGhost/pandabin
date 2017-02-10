@@ -10,13 +10,16 @@ main (void) {
     openlog(PROGNM, LOG_CONS, LOG_USER);
     syslog(LOG_INFO, "Started\n");
 
+    sqlite3 * db = 0;
+
     status = pandabin_dir_init();
     if ( status != EXIT_SUCCESS ) { goto cleanup; }
 
-    status = pandabin_db_init();
-    if ( status != EXIT_SUCCESS ) { goto cleanup; }
+    db = pandabin_db_init();
+    if ( !db ) { status = EXIT_FAILURE; goto cleanup; }
 
     cleanup:
+        pandabin_db_cleanup(db);
         syslog(LOG_INFO, "Ended\n");
         closelog();
         return status;

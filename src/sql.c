@@ -36,3 +36,10 @@ pandabin_db_insert (sqlite3 * db, struct pandabin_paste * pst) {
         return status;
 }
 
+signed
+pandabin_db_cleanup (sqlite3 * db) {
+
+    if ( db ) {
+        sqlite3_close(db);
+    } return EXIT_SUCCESS;
+}

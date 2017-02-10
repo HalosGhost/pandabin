@@ -12,6 +12,9 @@ pandabin_db_init (void);
 signed
 pandabin_db_insert (sqlite3 *, struct pandabin_paste *);
 
+signed
+pandabin_db_cleanup (sqlite3 *);
+
 static const char * pandabin_schema =
     "create table if not exists 'pastes'"
     "  ( 'uuid'    text    primary key"
