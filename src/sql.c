@@ -17,6 +17,9 @@ pandabin_db_init (void) {
         FAIL("Failed to initialize schema: %s\n", err);
     }
 
+    const char * leftovers;
+    status = sqlite3_prepare_v2(db, ins_stmt, -1, &ins_handle, &leftovers);
+
     cleanup:
         if ( status != SQLITE_OK ) {
             sqlite3_close(db);
@@ -39,6 +42,7 @@ pandabin_db_insert (sqlite3 * db, struct pandabin_paste * pst) {
 signed
 pandabin_db_cleanup (sqlite3 * db) {
 
+    if ( ins_handle ) { sqlite3_finalize(ins_handle); }
     if ( db ) {
         sqlite3_close(db);
     } return EXIT_SUCCESS;
