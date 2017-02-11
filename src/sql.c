@@ -71,6 +71,37 @@ pandabin_db_insert (sqlite3 * db, struct pandabin_paste * pst) {
 }
 
 signed
+pandabin_db_delete (sqlite3 * db, struct pandabin_paste * pst) {
+
+    signed status = EXIT_SUCCESS;
+
+    char uuid [37] = "";
+    uuid_unparse_lower(pst->uuid, uuid);
+    status = sqlite3_bind_text(rmv_handle, 1, uuid, 36, NULL);
+    if ( status != SQLITE_OK ) {
+        FAIL("Failed to bind uuid: %s\n", sqlite3_errmsg(db));
+    }
+
+    status = sqlite3_step(rmv_handle);
+    if ( status != SQLITE_DONE ) {
+        FAIL("Failed to execute delete: %s\n", sqlite3_errmsg(db));
+    }
+
+    status = sqlite3_reset(rmv_handle);
+    if ( status != SQLITE_OK ) {
+        FAIL("Failed to reset delete: %s\n", sqlite3_errmsg(db));
+    }
+
+    status = unlink(pst->path);
+    if ( status ) {
+        FAIL("Failed to delete paste content: %s\n", strerror(status));
+    }
+
+    cleanup:
+        return status;
+}
+
+signed
 pandabin_db_cleanup (sqlite3 * db) {
 
     if ( ins_handle ) { sqlite3_finalize(ins_handle); }
