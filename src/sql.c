@@ -37,7 +37,7 @@ pandabin_db_insert (sqlite3 * db, struct pandabin_paste * pst) {
 
     char uuid [37] = "";
     uuid_unparse_lower(pst->uuid, uuid);
-    status = sqlite3_bind_text(ins_handle, 1, uuid, -1, NULL);
+    status = sqlite3_bind_text(ins_handle, 1, uuid, 36, NULL);
     if ( status != SQLITE_OK ) {
         FAIL("Failed to bind uuid: %s\n", sqlite3_errmsg(db));
     }
@@ -59,12 +59,12 @@ pandabin_db_insert (sqlite3 * db, struct pandabin_paste * pst) {
 
     status = sqlite3_step(ins_handle);
     if ( status != SQLITE_DONE ) {
-        FAIL("Failed to execute statement: %s\n", sqlite3_errmsg(db));
+        FAIL("Failed to execute insert: %s\n", sqlite3_errmsg(db));
     }
 
     status = sqlite3_reset(ins_handle);
     if ( status != SQLITE_OK ) {
-        FAIL("Failed to reset statement: %s\n", sqlite3_errmsg(db));
+        FAIL("Failed to reset insert: %s\n", sqlite3_errmsg(db));
     }
     cleanup:
         return status;
