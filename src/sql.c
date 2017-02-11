@@ -75,6 +75,7 @@ pandabin_db_insert (sqlite3 * db, struct pandabin_paste * pst) {
         errno = status;
         FAIL("Failed to reset insert: %s\n", sqlite3_errmsg(db));
     }
+
     cleanup:
         return status;
 }
