@@ -19,6 +19,9 @@ pandabin_db_init (void) {
 
     const char * leftovers;
     status = sqlite3_prepare_v2(db, ins_stmt, -1, &ins_handle, &leftovers);
+    if ( status != SQLITE_OK ) {
+        FAIL("Failed to prepare insert statement: %s\n", sqlite3_errmsg(db));
+    }
 
     cleanup:
         if ( status != SQLITE_OK ) {
