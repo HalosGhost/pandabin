@@ -38,12 +38,23 @@ pandabin_db_insert (sqlite3 * db, struct pandabin_paste * pst) {
     char uuid [37] = "";
     uuid_unparse_lower(pst->uuid, uuid);
     status = sqlite3_bind_text(ins_handle, 1, uuid, -1, NULL);
-    status = sqlite3_bind_text(ins_handle, 2, pst->path, -1, NULL);
-    status = sqlite3_bind_int(ins_handle, 3, (signed )pst->size);
-    status = sqlite3_bind_text(ins_handle, 4, pst->hash, -1, NULL);
-
     if ( status != SQLITE_OK ) {
-        FAIL("Failed to bind arguments: %s\n", sqlite3_errmsg(db));
+        FAIL("Failed to bind uuid: %s\n", sqlite3_errmsg(db));
+    }
+
+    status = sqlite3_bind_text(ins_handle, 2, pst->path, -1, NULL);
+    if ( status != SQLITE_OK ) {
+        FAIL("Failed to bind path: %s\n", sqlite3_errmsg(db));
+    }
+
+    status = sqlite3_bind_int(ins_handle, 3, (signed )pst->size);
+    if ( status != SQLITE_OK ) {
+        FAIL("Failed to bind size: %s\n", sqlite3_errmsg(db));
+    }
+
+    status = sqlite3_bind_text(ins_handle, 4, pst->hash, -1, NULL);
+    if ( status != SQLITE_OK ) {
+        FAIL("Failed to bind hash: %s\n", sqlite3_errmsg(db));
     }
 
     status = sqlite3_step(ins_handle);
