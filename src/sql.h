@@ -24,7 +24,7 @@ static const char * ins_stmt =
 
 static sqlite3_stmt * sel_handle;
 static const char * sel_stmt =
-    "select * from pastes where hash like ?;";
+    "select * from pastes where ? like ?;";
 
 static sqlite3_stmt * rmv_handle;
 static const char * rmv_stmt =
