@@ -23,12 +23,10 @@ static const char * ins_stmt =
     "insert into 'pastes' values (?, ?, ?, ?, strftime('%s', 'now', 'utc'));";
 
 static sqlite3_stmt * sel_handle;
-static const char * sel_stmt =
-    "select * from pastes where ? like ?;";
+static const char * sel_stmt = "select * from pastes where ? like ?;";
 
 static sqlite3_stmt * rmv_handle;
-static const char * rmv_stmt =
-    "delete from pastes where uuid = ?;";
+static const char * rmv_stmt = "delete from pastes where uuid = ?;";
 
 static const char * pandabin_schema =
     "create table if not exists 'pastes'"
