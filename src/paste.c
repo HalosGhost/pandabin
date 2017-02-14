@@ -100,8 +100,11 @@ pandabin_paste_free (struct pandabin_paste * pst) {
 
     if ( pst ) {
         if ( pst->hash ) { free(pst->hash); }
+        pst->hash = 0;
         if ( pst->path ) { free(pst->path); }
+        pst->path = 0;
         free(pst);
+        pst = 0;
     }
 }
 
