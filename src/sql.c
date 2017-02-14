@@ -26,6 +26,18 @@ pandabin_db_init (void) {
         FAIL("Failed to prepare insert statement: %s\n", sqlite3_errmsg(db));
     }
 
+    status = sqlite3_prepare_v2(db, sel_stmt, -1, &sel_handle, &leftovers);
+    if ( status != SQLITE_OK ) {
+        errno = status;
+        FAIL("Failed to prepare insert statement: %s\n", sqlite3_errmsg(db));
+    }
+
+    status = sqlite3_prepare_v2(db, rmv_stmt, -1, &rmv_handle, &leftovers);
+    if ( status != SQLITE_OK ) {
+        errno = status;
+        FAIL("Failed to prepare insert statement: %s\n", sqlite3_errmsg(db));
+    }
+
     cleanup:
         if ( status != SQLITE_OK ) {
             sqlite3_close(db);
@@ -34,7 +46,7 @@ pandabin_db_init (void) {
 }
 
 signed
-pandabin_db_insert (sqlite3 * db, struct pandabin_paste * pst) {
+pandabin_db_insert (struct pandabin_paste * pst) {
 
     signed status = EXIT_SUCCESS;
 
@@ -43,37 +55,37 @@ pandabin_db_insert (sqlite3 * db, struct pandabin_paste * pst) {
     status = sqlite3_bind_text(ins_handle, 1, uuid, 36, NULL);
     if ( status != SQLITE_OK ) {
         errno = status;
-        FAIL("Failed to bind uuid: %s\n", sqlite3_errmsg(db));
+        FAIL("Failed to bind uuid: %s\n", sqlite3_errstr(status));
     }
 
     status = sqlite3_bind_text(ins_handle, 2, pst->path, -1, NULL);
     if ( status != SQLITE_OK ) {
         errno = status;
-        FAIL("Failed to bind path: %s\n", sqlite3_errmsg(db));
+        FAIL("Failed to bind path: %s\n", sqlite3_errstr(status));
     }
 
     status = sqlite3_bind_int(ins_handle, 3, (signed )pst->size);
     if ( status != SQLITE_OK ) {
         errno = status;
-        FAIL("Failed to bind size: %s\n", sqlite3_errmsg(db));
+        FAIL("Failed to bind size: %s\n", sqlite3_errstr(status));
     }
 
     status = sqlite3_bind_text(ins_handle, 4, pst->hash, -1, NULL);
     if ( status != SQLITE_OK ) {
         errno = status;
-        FAIL("Failed to bind hash: %s\n", sqlite3_errmsg(db));
+        FAIL("Failed to bind hash: %s\n", sqlite3_errstr(status));
     }
 
     status = sqlite3_step(ins_handle);
     if ( status != SQLITE_DONE ) {
         errno = status;
-        FAIL("Failed to execute insert: %s\n", sqlite3_errmsg(db));
+        FAIL("Failed to execute insert: %s\n", sqlite3_errstr(status));
     }
 
     status = sqlite3_reset(ins_handle);
     if ( status != SQLITE_OK ) {
         errno = status;
-        FAIL("Failed to reset insert: %s\n", sqlite3_errmsg(db));
+        FAIL("Failed to reset insert: %s\n", sqlite3_errstr(status));
     }
 
     cleanup:
@@ -81,8 +93,7 @@ pandabin_db_insert (sqlite3 * db, struct pandabin_paste * pst) {
 }
 
 struct pandabin_paste *
-pandabin_db_select (sqlite3 * db, const char * restrict key,
-                                  const char * restrict val) {
+pandabin_db_select (const char * restrict key, const char * restrict val) {
 
     signed status = EXIT_SUCCESS;
 
@@ -105,23 +116,20 @@ pandabin_db_select (sqlite3 * db, const char * restrict key,
     status = sqlite3_bind_text(sel_handle, 1, key, -1, NULL);
     if ( status != SQLITE_OK ) {
         errno = status;
-        FAIL("Failed to bind key: %s\n", sqlite3_errmsg(db));
+        FAIL("Failed to bind key: %s\n", sqlite3_errstr(status));
     }
 
     status = sqlite3_bind_text(sel_handle, 2, val, -1, NULL);
     if ( status != SQLITE_OK ) {
         errno = status;
-        FAIL("Failed to bind value: %s\n", sqlite3_errmsg(db));
+        FAIL("Failed to bind value: %s\n", sqlite3_errstr(status));
     }
 
     status = sqlite3_step(sel_handle);
     if ( status != SQLITE_ROW ) {
-        if ( pst->hash ) { free(pst->hash); }
-        if ( pst->path ) { free(pst->path); }
-        if ( pst ) { free(pst); }
-        pst = NULL;
+        pandabin_paste_free(pst);
         errno = status;
-        FAIL("Failed to retrieve paste: %s\n", sqlite3_errmsg(db));
+        FAIL("Failed to retrieve paste: %s\n", sqlite3_errstr(status));
         goto cleanup;
     }
 
@@ -145,7 +153,7 @@ pandabin_db_select (sqlite3 * db, const char * restrict key,
 }
 
 signed
-pandabin_db_delete (sqlite3 * db, struct pandabin_paste * pst) {
+pandabin_db_delete (struct pandabin_paste * pst) {
 
     signed status = EXIT_SUCCESS;
 
@@ -154,25 +162,27 @@ pandabin_db_delete (sqlite3 * db, struct pandabin_paste * pst) {
     status = sqlite3_bind_text(rmv_handle, 1, uuid, 36, NULL);
     if ( status != SQLITE_OK ) {
         errno = status;
-        FAIL("Failed to bind uuid: %s\n", sqlite3_errmsg(db));
+        FAIL("Failed to bind uuid: %s\n", sqlite3_errstr(status));
     }
 
     status = sqlite3_step(rmv_handle);
     if ( status != SQLITE_DONE ) {
         errno = status;
-        FAIL("Failed to execute delete: %s\n", sqlite3_errmsg(db));
+        FAIL("Failed to execute delete: %s\n", sqlite3_errstr(status));
     }
 
     status = sqlite3_reset(rmv_handle);
     if ( status != SQLITE_OK ) {
         errno = status;
-        FAIL("Failed to reset delete: %s\n", sqlite3_errmsg(db));
+        FAIL("Failed to reset delete: %s\n", sqlite3_errstr(status));
     }
 
     status = unlink(pst->path);
     if ( status ) {
         FAIL("Failed to delete paste content: %s\n", strerror(status));
     }
+
+    status = EXIT_SUCCESS;
 
     cleanup:
         return status;
@@ -182,6 +192,8 @@ signed
 pandabin_db_cleanup (sqlite3 * db) {
 
     if ( ins_handle ) { sqlite3_finalize(ins_handle); }
+    if ( sel_handle ) { sqlite3_finalize(sel_handle); }
+    if ( rmv_handle ) { sqlite3_finalize(rmv_handle); }
     if ( db ) {
         sqlite3_close(db);
     } return EXIT_SUCCESS;

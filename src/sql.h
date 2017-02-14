@@ -10,13 +10,13 @@ sqlite3 *
 pandabin_db_init (void);
 
 signed
-pandabin_db_insert (sqlite3 *, struct pandabin_paste *);
+pandabin_db_insert (struct pandabin_paste *);
 
 struct pandabin_paste *
-pandabin_db_select (sqlite3 *, const char * restrict, const char * restrict);
+pandabin_db_select (const char * restrict, const char * restrict);
 
 signed
-pandabin_db_delete (sqlite3 *, struct pandabin_paste *);
+pandabin_db_delete (struct pandabin_paste *);
 
 signed
 pandabin_db_cleanup (sqlite3 *);
