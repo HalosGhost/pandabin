@@ -80,6 +80,70 @@ pandabin_db_insert (sqlite3 * db, struct pandabin_paste * pst) {
         return status;
 }
 
+struct pandabin_paste *
+pandabin_db_select (sqlite3 * db, const char * restrict key,
+                                  const char * restrict val) {
+
+    signed status = EXIT_SUCCESS;
+
+    struct pandabin_paste * pst = malloc(sizeof(struct pandabin_paste));
+    if ( !pst ) {
+        FAIL("Failed to allocate paste struct: %s\n", strerror(ENOMEM));
+    }
+
+    pst->hash = malloc(65);
+    if ( !pst->hash ) {
+        FAIL("Failed to allocate hash hexdigest: %s\n", strerror(ENOMEM));
+    }
+
+    size_t pathlen = strlen(FILEPATH) + 71;
+    pst->path = malloc(pathlen);
+    if ( !pst->path ) {
+        FAIL("Failed to allocate path: %s\n", strerror(ENOMEM));
+    }
+
+    status = sqlite3_bind_text(sel_handle, 1, key, -1, NULL);
+    if ( status != SQLITE_OK ) {
+        errno = status;
+        FAIL("Failed to bind key: %s\n", sqlite3_errmsg(db));
+    }
+
+    status = sqlite3_bind_text(sel_handle, 2, val, -1, NULL);
+    if ( status != SQLITE_OK ) {
+        errno = status;
+        FAIL("Failed to bind value: %s\n", sqlite3_errmsg(db));
+    }
+
+    status = sqlite3_step(sel_handle);
+    if ( status != SQLITE_ROW ) {
+        if ( pst->hash ) { free(pst->hash); }
+        if ( pst->path ) { free(pst->path); }
+        if ( pst ) { free(pst); }
+        pst = NULL;
+        errno = status;
+        FAIL("Failed to retrieve paste: %s\n", sqlite3_errmsg(db));
+        goto cleanup;
+    }
+
+    status = uuid_parse((const char * )sqlite3_column_text(sel_handle, 0),
+                        pst->uuid);
+    if ( status ) {
+        errno = status;
+        FAIL("Failed to parse uuid: %s\n", "unknown error");
+    }
+
+    strncpy(pst->path, (const char * )sqlite3_column_text(sel_handle, 1),
+                       pathlen);
+
+    pst->size = (size_t )sqlite3_column_int(sel_handle, 2);
+
+    strncpy(pst->hash, (const char * )sqlite3_column_text(sel_handle, 3), 65);
+
+    cleanup:
+        sqlite3_reset(sel_handle);
+        return pst;
+}
+
 signed
 pandabin_db_delete (sqlite3 * db, struct pandabin_paste * pst) {
 
