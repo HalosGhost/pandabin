@@ -127,10 +127,8 @@ pandabin_db_select (const char * restrict key, const char * restrict val) {
 
     status = sqlite3_step(sel_handle);
     if ( status != SQLITE_ROW ) {
-        pandabin_paste_free(pst);
         errno = status;
         FAIL("Failed to retrieve paste: %s\n", sqlite3_errstr(status));
-        goto cleanup;
     }
 
     status = uuid_parse((const char * )sqlite3_column_text(sel_handle, 0),
@@ -149,6 +147,7 @@ pandabin_db_select (const char * restrict key, const char * restrict val) {
 
     cleanup:
         sqlite3_reset(sel_handle);
+        if ( status != EXIT_SUCCESS ) { pandabin_paste_free(&pst); }
         return pst;
 }
 

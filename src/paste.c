@@ -90,21 +90,21 @@ pandabin_paste_new (const char * content, size_t size) {
 
     cleanup:
         if ( status != EXIT_SUCCESS ) {
-            pandabin_paste_free(pst);
+            pandabin_paste_free(&pst);
             pst = NULL;
         } return pst;
 }
 
 void
-pandabin_paste_free (struct pandabin_paste * pst) {
+pandabin_paste_free (struct pandabin_paste ** pst) {
 
-    if ( pst ) {
-        if ( pst->hash ) { free(pst->hash); }
-        pst->hash = 0;
-        if ( pst->path ) { free(pst->path); }
-        pst->path = 0;
-        free(pst);
-        pst = 0;
+    if ( pst && *pst ) {
+        if ( (*pst)->hash ) { free((*pst)->hash); }
+        (*pst)->hash = 0;
+        if ( (*pst)->path ) { free((*pst)->path); }
+        (*pst)->path = 0;
+        free(*pst);
+        *pst = 0;
     }
 }
 

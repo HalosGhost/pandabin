@@ -16,7 +16,7 @@ struct pandabin_paste *
 pandabin_paste_new (const char *, size_t);
 
 void
-pandabin_paste_free (struct pandabin_paste *);
+pandabin_paste_free (struct pandabin_paste **);
 
 #include "main.h"
 
