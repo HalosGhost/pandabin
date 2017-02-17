@@ -13,7 +13,7 @@ signed
 pandabin_db_insert (struct pandabin_paste *);
 
 struct pandabin_paste *
-pandabin_db_select (const char * restrict, const char * restrict);
+pandabin_db_select (const char * restrict);
 
 signed
 pandabin_db_delete (struct pandabin_paste *);
@@ -26,7 +26,7 @@ static const char * ins_stmt =
     "insert into 'pastes' values (?, ?, ?, ?, strftime('%s', 'now', 'utc'));";
 
 static sqlite3_stmt * sel_handle;
-static const char * sel_stmt = "select * from pastes where ? like ?;";
+static const char * sel_stmt = "select * from pastes where 'hash' like ?;";
 
 static sqlite3_stmt * rmv_handle;
 static const char * rmv_stmt = "delete from pastes where uuid = ?;";

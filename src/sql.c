@@ -93,7 +93,7 @@ pandabin_db_insert (struct pandabin_paste * pst) {
 }
 
 struct pandabin_paste *
-pandabin_db_select (const char * restrict key, const char * restrict val) {
+pandabin_db_select (const char * restrict val) {
 
     signed status = EXIT_SUCCESS;
 
@@ -113,13 +113,7 @@ pandabin_db_select (const char * restrict key, const char * restrict val) {
         FAIL("Failed to allocate path: %s\n", strerror(ENOMEM));
     }
 
-    status = sqlite3_bind_text(sel_handle, 1, key, -1, NULL);
-    if ( status != SQLITE_OK ) {
-        errno = status;
-        FAIL("Failed to bind key: %s\n", sqlite3_errstr(status));
-    }
-
-    status = sqlite3_bind_text(sel_handle, 2, val, -1, NULL);
+    status = sqlite3_bind_text(sel_handle, 1, val, -1, NULL);
     if ( status != SQLITE_OK ) {
         errno = status;
         FAIL("Failed to bind value: %s\n", sqlite3_errstr(status));
