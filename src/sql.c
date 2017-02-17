@@ -145,6 +145,8 @@ pandabin_db_select (const char * restrict key, const char * restrict val) {
 
     strncpy(pst->hash, (const char * )sqlite3_column_text(sel_handle, 3), 65);
 
+    status = EXIT_SUCCESS;
+
     cleanup:
         sqlite3_reset(sel_handle);
         if ( status != EXIT_SUCCESS ) { pandabin_paste_free(&pst); }
