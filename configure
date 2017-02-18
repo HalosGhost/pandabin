@@ -1,0 +1,113 @@
+#!/usr/bin/env bash
+
+usage () {
+    printf "Usage: ./configure [options]\n\n"
+    printf "Options:\n"
+    printf "  --cc='COMP'       Use COMP for compiler (default: clang)\n"
+    printf "  --cflags='FLAGS'  Set CFLAGS (cf. Tuprules.tup for defaults)\n"
+    printf "  --file-max='BTS'  Set max file size to BTS Bytes (default: 67108864)\n"
+    printf "  --prefix='PATH'   Set prefix (default: '/usr/local')\n"
+    printf "  --reset-config    Reset configuration to the defaults\n"
+}
+
+check_file () {
+    [[ -f "$1" ]] && fnd='\x1b[32mY' || fnd='\x1b[31m\x1b[1mN';
+    printf 'Found %-34s\t[ %b\x1b[0m ]\n' "$1:" "$fnd"
+    [[ -f "$1" ]] || exit 1
+}
+
+def_cflags=(-g -O3 -fPIE -pie -Weverything -Werror -std=c11 -ggdb
+            -D_FORTIFY_SOURCE=2 -fstack-protector-strong -march=native
+            --param=ssp-buffer-size=1 -Wl,-z,relro,-z,now -flto
+            -fsanitize=undefined -fsanitize-trap=undefined)
+
+check_deps () {
+    i_cc=$(show_tuprule CC | cut -d' ' -f3)
+    for i in make tup pkg-config "$(which "$i_cc")" mkdir install rm; do
+        [[ "$(which "$i" &> /dev/null; echo $?)" == 0 ]] && {
+            check_file "$(which "$i")"
+        } || check_file "$i"
+    done
+
+    hdrs=(errno stdio stdlib unistd syslog string 'linux/limits' 'sys/stat'
+    'sys/types' stdbool 'lwan/lwan') # sql pastes routes)
+
+    for i in "${hdrs[@]}"; do
+        fh=$($i_cc -c -o tm -x c - <<< "#include <$i.h>" &> /dev/null; echo $?)
+        [[ "$fh" == 0 ]] && {
+            fnd='\x1b[32mY'; [[ -f "tm" ]] && rm -- tm
+        } || fnd='\x1b[31m\x1b[1mN'
+
+        printf 'Found %-34s\t[ %b\x1b[0m ]\n' "$i.h:" "$fnd"
+        [[ "$fh" != 0 ]] && exit 1
+    done
+
+    for i in "${def_cflags[@]}"; do
+        fc=$($i_cc -c -o tm -x c - "$i" <<< "#include <time.h>" &> /dev/null; echo $?)
+        [[ "$fc" == 0 ]] && {
+            fnd='\x1b[32mY'; [[ -f "tm" ]] && rm -- tm
+        } || fnd='\x1b[31m\x1b[1mN'
+
+        printf 'Found %-34s\t[ %b\x1b[0m ]\n' "$i:" "$fnd"
+        [[ "$fc" != 0 ]] && exit 1
+    done
+
+    for i in uuid ssl sqlite3 lwan; do
+        check_file "/usr/lib/lib$i.so"
+    done
+}
+
+update_tuprule () {
+    sed -i ./Tuprules.tup -re "s/$1.*/$1 = $2/"
+}
+
+update () {
+    sed -i ./src/main.h -re "s|(define $1) (.*)$|\\1 $2|"
+}
+
+update_makevar () {
+    sed -i ./Makefile -re "1s|$1((\\s+)?.?=).*|$1\\1 $2|;t" \
+                       -e "1,/$1((\\s+)?.?=).*/s||$1\\1 $2|"
+}
+
+default_config () {
+    update MAXSIZE '67108864'
+    update PREFIX '"/usr/local"'
+    update_makevar PREFIX '/usr/local'
+    update_tuprule CFLAGS "${def_cflags[*]}"
+    update_tuprule CC 'clang'
+}
+
+show_tuprule () {
+    grep --color=never "$1" ./Tuprules.tup
+}
+
+show_value () {
+    printf "$1: %s\n" \
+       "$('grep' "#define $2" ./src/main.h | sed -re "s/#define $2 (.*)$/\\1/")"
+}
+
+show_config () {
+    show_tuprule CFLAGS
+    show_tuprule CC
+    show_value 'Max File Size' MAXSIZE
+    show_value 'Prefix' PREFIX
+}
+
+for i in "$@"; do
+    case "$i" in
+        --cc=*)         update_tuprule CC "${i#*=}"; shift;;
+        --cflags=*)     update_tuprule CFLAGS "${i#*=}"; shift;;
+        --file-max=*)   update MAXSIZE "${i#*=}"; shift;;
+        --help)         usage; exit 0;;
+        --prefix=*)     pref="${i#*=}"
+                        update PREFIX "\"$pref\""
+                        update_makevar PREFIX "$pref"
+                        shift;;
+        --reset-config) default_config; break;
+    esac
+done
+
+show_config
+check_deps
+exit 0
