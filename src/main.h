@@ -13,11 +13,16 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <stdbool.h>
+#include <lwan/lwan.h>
 #include "sql.h"
 #include "paste.h"
+#include "routes.h"
+
+// Configurables
+#define PREFIX   "/opt"
+#define MAXSIZE  67108864
 
 #define PROGNM   "pandabin"
-#define PREFIX   "/opt"
 #define MAINPATH PREFIX "/" PROGNM
 #define DBPATH   MAINPATH "/db.sqlite"
 #define FILEPATH MAINPATH "/files"

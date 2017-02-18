@@ -11,6 +11,9 @@ main (void) {
     syslog(LOG_INFO, "Started\n");
 
     sqlite3 * db = 0;
+    struct lwan l;
+    struct lwan_config c = *lwan_get_default_config();
+    c.max_post_data_size = MAXSIZE;
 
     status = pandabin_dir_init();
     if ( status != EXIT_SUCCESS ) { goto cleanup; }
@@ -18,7 +21,18 @@ main (void) {
     db = pandabin_db_init();
     if ( !db ) { status = EXIT_FAILURE; goto cleanup; }
 
+    lwan_init_with_config(&l, &c);
+
+    const struct lwan_url_map map [] = {
+        { .prefix = "/", .handler = serve_index },
+        { .prefix = NULL }
+    };
+
+    lwan_set_url_map(&l, map);
+    lwan_main_loop(&l);
+
     cleanup:
+        lwan_shutdown(&l);
         pandabin_db_cleanup(db);
         syslog(LOG_INFO, "Ended\n");
         closelog();
