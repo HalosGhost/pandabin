@@ -19,8 +19,8 @@
 #include "routes.h"
 
 // Configurables
-#define PREFIX   "/opt"
-#define MAXSIZE  67108864
+#define PREFIX "/opt"
+#define MAXSIZE 67108864
 
 #define PROGNM   "pandabin"
 #define MAINPATH PREFIX "/" PROGNM
