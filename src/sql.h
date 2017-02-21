@@ -18,6 +18,9 @@ pandabin_db_select (const char * restrict);
 signed
 pandabin_db_delete (struct pandabin_paste *);
 
+struct pandabin_settings *
+pandabin_settings_fetch (sqlite3 *);
+
 signed
 pandabin_db_cleanup (sqlite3 *);
 
@@ -31,6 +34,9 @@ static const char * sel_stmt = "select * from pastes where hash like ?;";
 static sqlite3_stmt * rmv_handle;
 static const char * rmv_stmt = "delete from pastes where uuid = ?;";
 
+static sqlite3_stmt * set_handle;
+static const char * set_stmt = "select value from settings where name = ?;";
+
 static const char * pandabin_schema =
     "create table if not exists 'pastes'"
     "  ( 'uuid'    text    primary key"
@@ -43,6 +49,9 @@ static const char * pandabin_schema =
     "create table if not exists 'settings'"
     "  ( 'name'    text    primary key"
     "  , 'value'           not null"
-    "  );";
+    "  );"
+
+    "insert or replace into 'settings'"
+    "  values ('max size', 67108864);";
 
 #endif

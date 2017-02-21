@@ -13,7 +13,7 @@ main (void) {
     sqlite3 * db = 0;
     struct lwan l;
     struct lwan_config c = *lwan_get_default_config();
-    c.max_post_data_size = MAXSIZE;
+    struct pandabin_settings * settings = 0;
 
     status = pandabin_dir_init();
     if ( status != EXIT_SUCCESS ) { goto cleanup; }
@@ -21,10 +21,15 @@ main (void) {
     db = pandabin_db_init();
     if ( !db ) { status = EXIT_FAILURE; goto cleanup; }
 
+    settings = pandabin_settings_fetch(db);
+    if ( !settings ) { status = EXIT_FAILURE; goto cleanup; }
+
+    c.max_post_data_size = settings ? settings->maxsize : MAXSIZE;
+
     lwan_init_with_config(&l, &c);
 
     const struct lwan_url_map map [] = {
-        { .prefix = "/", .handler = serve_index },
+        { .prefix = "/home", .handler = serve_index },
         { .prefix = NULL }
     };
 
@@ -33,6 +38,7 @@ main (void) {
 
     cleanup:
         lwan_shutdown(&l);
+        if ( settings ) { free(settings); }
         pandabin_db_cleanup(db);
         syslog(LOG_INFO, "Ended\n");
         closelog();

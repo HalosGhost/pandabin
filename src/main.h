@@ -33,4 +33,8 @@
     goto cleanup; \
 } while (false)
 
+struct pandabin_settings {
+    size_t maxsize;
+};
+
 #endif
