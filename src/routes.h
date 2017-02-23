@@ -1,6 +1,8 @@
 #if !defined(PANDABIN_ROUTES_H)
 #define PANDABIN_ROUTES_H
 
+#pragma once
+
 #include <lwan/lwan.h>
 
 enum lwan_http_status
