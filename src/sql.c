@@ -189,18 +189,13 @@ pandabin_db_delete (struct pandabin_paste * pst) {
         return status;
 }
 
-struct pandabin_settings *
-pandabin_settings_fetch (sqlite3 * db) {
+void
+pandabin_settings_fetch (sqlite3 * db, struct pandabin_settings * settings) {
 
     signed status = EXIT_SUCCESS;
-    if ( !db ) { return NULL; }
+    if ( !db || !settings ) { return; }
 
     errno = 0;
-    struct pandabin_settings * set = malloc(sizeof(struct pandabin_settings));
-    if ( !set ) {
-        FAIL("Failed to allocate settings struct: %s\n", strerror(ENOMEM));
-    }
-
     status = sqlite3_bind_text(set_handle, 1, "max size", 8, NULL);
     if ( status != SQLITE_OK ) {
         errno = status;
@@ -209,11 +204,12 @@ pandabin_settings_fetch (sqlite3 * db) {
 
     status = sqlite3_step(set_handle);
     if ( status != SQLITE_ROW ) {
-        errno = status;
-        FAIL("Failed to retrieve setting: %s\n", sqlite3_errstr(status));
+        syslog(LOG_ERR, "Failed to retrieve setting (using default): %s\n",
+               sqlite3_errstr(status));
+        settings->maxsize = MAXSIZE;
     }
 
-    set->maxsize = (size_t )sqlite3_column_int(set_handle, 1);
+    settings->maxsize = (size_t )sqlite3_column_int(set_handle, 1);
 
     status = sqlite3_reset(set_handle);
     if ( status ) {
@@ -224,10 +220,7 @@ pandabin_settings_fetch (sqlite3 * db) {
     status = EXIT_SUCCESS;
 
     cleanup:
-        if ( status != EXIT_SUCCESS ) {
-            if ( set ) { free(set); }
-            set = NULL;
-        } return set;
+        return;
 }
 
 signed
@@ -237,7 +230,6 @@ pandabin_db_cleanup (sqlite3 * db) {
     if ( sel_handle ) { sqlite3_finalize(sel_handle); }
     if ( rmv_handle ) { sqlite3_finalize(rmv_handle); }
     if ( set_handle ) { sqlite3_finalize(set_handle); }
-    if ( db ) {
-        sqlite3_close(db);
-    } return EXIT_SUCCESS;
+    if ( db ) { sqlite3_close(db); }
+    return EXIT_SUCCESS;
 }

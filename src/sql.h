@@ -6,6 +6,10 @@
 #include <sqlite3.h>
 #include "paste.h"
 
+struct pandabin_settings {
+    size_t maxsize;
+};
+
 sqlite3 *
 pandabin_db_init (void);
 
@@ -18,8 +22,8 @@ pandabin_db_select (const char * restrict);
 signed
 pandabin_db_delete (struct pandabin_paste *);
 
-struct pandabin_settings *
-pandabin_settings_fetch (sqlite3 *);
+void
+pandabin_settings_fetch (sqlite3 *, struct pandabin_settings *);
 
 signed
 pandabin_db_cleanup (sqlite3 *);
