@@ -34,9 +34,9 @@ main (void) {
 
     lwan_set_url_map(&l, map);
     lwan_main_loop(&l);
+    lwan_shutdown(&l);
 
     cleanup:
-        lwan_shutdown(&l);
         pandabin_db_cleanup(db);
         syslog(LOG_INFO, "Ended\n");
         closelog();
