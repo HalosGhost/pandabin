@@ -55,7 +55,7 @@ static const char * pandabin_schema =
     "  , 'value'           not null"
     "  );"
 
-    "insert or replace into 'settings'"
+    "insert or ignore into 'settings'"
     "  values ('max size', 67108864);";
 
 #endif
