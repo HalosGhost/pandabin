@@ -8,4 +8,7 @@
 enum lwan_http_status
 serve_index (struct lwan_request *, struct lwan_response *, void *);
 
+enum lwan_http_status
+serve_paste (struct lwan_request *, struct lwan_response *, void *);
+
 #endif
