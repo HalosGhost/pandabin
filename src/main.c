@@ -29,7 +29,7 @@ main (void) {
 
     const struct lwan_url_map map [] = {
         { .prefix = "/home", .handler = serve_index },
-        { .prefix = "/", .handler = serve_paste },
+        { .prefix = "/", .handler = get_paste },
         { .prefix = NULL }
     };
 
