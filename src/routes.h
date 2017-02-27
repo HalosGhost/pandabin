@@ -13,4 +13,7 @@ serve_index (struct lwan_request *, struct lwan_response *, void *);
 enum lwan_http_status
 get_paste (struct lwan_request *, struct lwan_response *, void *);
 
+enum lwan_http_status
+delete_paste (struct lwan_request *, struct lwan_response *, void *);
+
 #endif

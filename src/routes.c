@@ -78,3 +78,21 @@ get_paste (struct lwan_request * rq, struct lwan_response * rsp, void * d) {
         return status;
 }
 
+enum lwan_http_status
+delete_paste (struct lwan_request * rq, struct lwan_response * rsp, void * d) {
+
+    (void )d;
+
+    enum lwan_http_status status = HTTP_OK;
+
+    const char * uuid = lwan_request_get_query_param(rq, "uuid");
+    struct pandabin_paste * pst = 0;
+
+    if ( lwan_request_get_method(rq) != REQUEST_METHOD_DELETE ) {
+        goto cleanup;
+    }
+
+    cleanup:
+        return status;
+}
+
