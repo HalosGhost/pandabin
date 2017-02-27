@@ -29,6 +29,10 @@ get_paste (struct lwan_request * rq, struct lwan_response * rsp, void * d) {
     struct pandabin_paste * pst = 0;
     char * content = 0;
 
+    if ( lwan_request_get_method(rq) != REQUEST_METHOD_GET ) {
+        goto cleanup;
+    }
+
     if ( !hash ) {
         syslog(LOG_ERR, "Failed to parse parameter\n");
         status = HTTP_BAD_REQUEST;
@@ -71,7 +75,6 @@ get_paste (struct lwan_request * rq, struct lwan_response * rsp, void * d) {
         if ( f ) { fclose(f); }
         if ( content ) { free(content); }
         if ( pst ) { pandabin_paste_free(&pst); }
-        fclose(f);
         return status;
 }
 
