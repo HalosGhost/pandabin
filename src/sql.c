@@ -29,13 +29,13 @@ pandabin_db_init (void) {
     status = sqlite3_prepare_v2(db, sel_stmt, -1, &sel_handle, &leftovers);
     if ( status != SQLITE_OK ) {
         errno = status;
-        FAIL("Failed to prepare insert statement: %s\n", sqlite3_errmsg(db));
+        FAIL("Failed to prepare select statement: %s\n", sqlite3_errmsg(db));
     }
 
     status = sqlite3_prepare_v2(db, rmv_stmt, -1, &rmv_handle, &leftovers);
     if ( status != SQLITE_OK ) {
         errno = status;
-        FAIL("Failed to prepare insert statement: %s\n", sqlite3_errmsg(db));
+        FAIL("Failed to prepare removal statement: %s\n", sqlite3_errmsg(db));
     }
 
     status = sqlite3_prepare_v2(db, set_stmt, -1, &set_handle, &leftovers);
