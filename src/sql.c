@@ -26,10 +26,16 @@ pandabin_db_init (void) {
         FAIL("Failed to prepare insert statement: %s\n", sqlite3_errmsg(db));
     }
 
-    status = sqlite3_prepare_v2(db, sel_stmt, -1, &sel_handle, &leftovers);
+    status = sqlite3_prepare_v2(db, sel_hash_stmt, -1, &sel_hash_handle, &leftovers);
     if ( status != SQLITE_OK ) {
         errno = status;
-        FAIL("Failed to prepare select statement: %s\n", sqlite3_errmsg(db));
+        FAIL("Failed to prepare select (hash) statement: %s\n", sqlite3_errmsg(db));
+    }
+
+    status = sqlite3_prepare_v2(db, sel_uuid_stmt, -1, &sel_uuid_handle, &leftovers);
+    if ( status != SQLITE_OK ) {
+        errno = status;
+        FAIL("Failed to prepare select (uuid) statement: %s\n", sqlite3_errmsg(db));
     }
 
     status = sqlite3_prepare_v2(db, rmv_stmt, -1, &rmv_handle, &leftovers);
@@ -99,11 +105,17 @@ pandabin_db_insert (struct pandabin_paste * pst) {
 }
 
 struct pandabin_paste *
-pandabin_db_select (const char * restrict val) {
+pandabin_db_select (sqlite3_stmt * handle, const char * restrict val) {
 
     signed status = EXIT_SUCCESS;
+    struct pandabin_paste * pst = 0;
 
-    struct pandabin_paste * pst = malloc(sizeof(struct pandabin_paste));
+    if ( !handle ) {
+        FAIL("Failed to acquire select handle\n");
+        goto cleanup;
+    }
+
+    pst = malloc(sizeof(struct pandabin_paste));
     if ( !pst ) {
         FAIL("Failed to allocate paste struct: %s\n", strerror(ENOMEM));
     }
@@ -119,36 +131,36 @@ pandabin_db_select (const char * restrict val) {
         FAIL("Failed to allocate path: %s\n", strerror(ENOMEM));
     }
 
-    status = sqlite3_bind_text(sel_handle, 1, val, -1, NULL);
+    status = sqlite3_bind_text(handle, 1, val, -1, NULL);
     if ( status != SQLITE_OK ) {
         errno = status;
         FAIL("Failed to bind value: %s\n", sqlite3_errstr(status));
     }
 
-    status = sqlite3_step(sel_handle);
+    status = sqlite3_step(handle);
     if ( status != SQLITE_ROW ) {
         errno = status;
         FAIL("Failed to retrieve paste: %s\n", sqlite3_errstr(status));
     }
 
-    status = uuid_parse((const char * )sqlite3_column_text(sel_handle, 0),
+    status = uuid_parse((const char * )sqlite3_column_text(handle, 0),
                         pst->uuid);
     if ( status ) {
         errno = status;
         FAIL("Failed to parse uuid: %s\n", "unknown error");
     }
 
-    strncpy(pst->path, (const char * )sqlite3_column_text(sel_handle, 1),
+    strncpy(pst->path, (const char * )sqlite3_column_text(handle, 1),
                        pathlen);
 
-    pst->size = (size_t )sqlite3_column_int(sel_handle, 2);
+    pst->size = (size_t )sqlite3_column_int(handle, 2);
 
-    strncpy(pst->hash, (const char * )sqlite3_column_text(sel_handle, 3), 65);
+    strncpy(pst->hash, (const char * )sqlite3_column_text(handle, 3), 65);
 
     status = EXIT_SUCCESS;
 
     cleanup:
-        sqlite3_reset(sel_handle);
+        sqlite3_reset(handle);
         if ( status != EXIT_SUCCESS ) { pandabin_paste_free(&pst); }
         return pst;
 }
@@ -227,7 +239,8 @@ signed
 pandabin_db_cleanup (sqlite3 * db) {
 
     if ( ins_handle ) { sqlite3_finalize(ins_handle); }
-    if ( sel_handle ) { sqlite3_finalize(sel_handle); }
+    if ( sel_hash_handle ) { sqlite3_finalize(sel_hash_handle); }
+    if ( sel_uuid_handle ) { sqlite3_finalize(sel_uuid_handle); }
     if ( rmv_handle ) { sqlite3_finalize(rmv_handle); }
     if ( set_handle ) { sqlite3_finalize(set_handle); }
     if ( db ) { sqlite3_close(db); }
