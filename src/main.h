@@ -18,6 +18,13 @@
 #include "paste.h"
 #include "routes.h"
 
+extern sqlite3_stmt
+    * ins_handle,
+    * sel_hash_handle,
+    * sel_uuid_handle,
+    * rmv_handle,
+    * set_handle;
+
 // Configurables
 #define PREFIX "/opt"
 #define MAXSIZE 67108864

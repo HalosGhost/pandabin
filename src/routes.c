@@ -39,7 +39,7 @@ get_paste (struct lwan_request * rq, struct lwan_response * rsp, void * d) {
         goto cleanup;
     }
 
-    pst = pandabin_db_select(sel_hash_handle, hash);
+    pst = pandabin_db_select(&sel_hash_handle, hash);
     if ( !pst ) {
         syslog(LOG_ERR, "Failed to retrieve paste\n");
         status = HTTP_NOT_FOUND;
@@ -92,7 +92,7 @@ delete_paste (struct lwan_request * rq, struct lwan_response * rsp, void * d) {
         goto cleanup;
     }
 
-    pst = pandabin_db_select(sel_uuid_handle, uuid);
+    pst = pandabin_db_select(&sel_uuid_handle, uuid);
     if ( !pst ) {
         syslog(LOG_ERR, "Failed to retrieve paste\n");
         status = HTTP_NOT_FOUND;

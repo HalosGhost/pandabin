@@ -3,6 +3,12 @@
 static signed
 pandabin_dir_init (void);
 
+sqlite3_stmt * ins_handle = 0,
+             * sel_hash_handle = 0,
+             * sel_uuid_handle = 0,
+             * rmv_handle = 0,
+             * set_handle = 0;
+
 signed
 main (void) {
 

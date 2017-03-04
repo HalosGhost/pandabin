@@ -105,12 +105,12 @@ pandabin_db_insert (struct pandabin_paste * pst) {
 }
 
 struct pandabin_paste *
-pandabin_db_select (sqlite3_stmt * handle, const char * restrict val) {
+pandabin_db_select (sqlite3_stmt ** handle, const char * restrict val) {
 
     signed status = EXIT_SUCCESS;
     struct pandabin_paste * pst = 0;
 
-    if ( !handle ) {
+    if ( !handle || !*handle ) {
         FAIL("Failed to acquire select handle\n");
         goto cleanup;
     }
@@ -131,36 +131,36 @@ pandabin_db_select (sqlite3_stmt * handle, const char * restrict val) {
         FAIL("Failed to allocate path: %s\n", strerror(ENOMEM));
     }
 
-    status = sqlite3_bind_text(handle, 1, val, -1, NULL);
+    status = sqlite3_bind_text(*handle, 1, val, -1, NULL);
     if ( status != SQLITE_OK ) {
         errno = status;
         FAIL("Failed to bind value: %s\n", sqlite3_errstr(status));
     }
 
-    status = sqlite3_step(handle);
+    status = sqlite3_step(*handle);
     if ( status != SQLITE_ROW ) {
         errno = status;
         FAIL("Failed to retrieve paste: %s\n", sqlite3_errstr(status));
     }
 
-    status = uuid_parse((const char * )sqlite3_column_text(handle, 0),
+    status = uuid_parse((const char * )sqlite3_column_text(*handle, 0),
                         pst->uuid);
     if ( status ) {
         errno = status;
         FAIL("Failed to parse uuid: %s\n", "unknown error");
     }
 
-    strncpy(pst->path, (const char * )sqlite3_column_text(handle, 1),
+    strncpy(pst->path, (const char * )sqlite3_column_text(*handle, 1),
                        pathlen);
 
-    pst->size = (size_t )sqlite3_column_int(handle, 2);
+    pst->size = (size_t )sqlite3_column_int(*handle, 2);
 
-    strncpy(pst->hash, (const char * )sqlite3_column_text(handle, 3), 65);
+    strncpy(pst->hash, (const char * )sqlite3_column_text(*handle, 3), 65);
 
     status = EXIT_SUCCESS;
 
     cleanup:
-        sqlite3_reset(handle);
+        sqlite3_reset(*handle);
         if ( status != EXIT_SUCCESS ) { pandabin_paste_free(&pst); }
         return pst;
 }
