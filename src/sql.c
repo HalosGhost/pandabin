@@ -19,40 +19,18 @@ pandabin_db_init (void) {
         FAIL("Failed to initialize schema: %s\n", err);
     }
 
-    const char * leftovers;
-    status = sqlite3_prepare_v2(db, ins_stmt, -1, &ins_handle, &leftovers);
-    if ( status != SQLITE_OK ) {
-        errno = status;
-        FAIL("Failed to prepare insert statement: %s\n", sqlite3_errmsg(db));
-    }
-
-    status = sqlite3_prepare_v2(db, sel_hash_stmt, -1, &sel_hash_handle, &leftovers);
-    if ( status != SQLITE_OK ) {
-        errno = status;
-        FAIL("Failed to prepare select (hash) statement: %s\n", sqlite3_errmsg(db));
-    }
-
-    status = sqlite3_prepare_v2(db, sel_uuid_stmt, -1, &sel_uuid_handle, &leftovers);
-    if ( status != SQLITE_OK ) {
-        errno = status;
-        FAIL("Failed to prepare select (uuid) statement: %s\n", sqlite3_errmsg(db));
-    }
-
-    status = sqlite3_prepare_v2(db, rmv_stmt, -1, &rmv_handle, &leftovers);
-    if ( status != SQLITE_OK ) {
-        errno = status;
-        FAIL("Failed to prepare removal statement: %s\n", sqlite3_errmsg(db));
-    }
-
-    status = sqlite3_prepare_v2(db, set_stmt, -1, &set_handle, &leftovers);
-    if ( status != SQLITE_OK ) {
-        errno = status;
-        FAIL("Failed to prepare settings statement: %s\n", sqlite3_errmsg(db));
+    const char * left;
+    for ( enum pandabin_tag i = INS; i < LAST; ++ i ) {
+        status = sqlite3_prepare_v2(db, sql_stmts[i], -1, &sql_hndls[i], &left);
+        if ( status != SQLITE_OK ) {
+            errno = status;
+            FAIL("Failed to prepare statement (%d): %s\n", i, sqlite3_errmsg(db));
+        }
     }
 
     cleanup:
         if ( status != SQLITE_OK ) {
-            sqlite3_close(db);
+            pandabin_db_cleanup(db);
             return NULL;
         } return db;
 }
@@ -64,37 +42,37 @@ pandabin_db_insert (struct pandabin_paste * pst) {
 
     char uuid [37] = "";
     uuid_unparse_lower(pst->uuid, uuid);
-    status = sqlite3_bind_text(ins_handle, 1, uuid, 36, NULL);
+    status = sqlite3_bind_text(sql_hndls[INS], 1, uuid, 36, NULL);
     if ( status != SQLITE_OK ) {
         errno = status;
         FAIL("Failed to bind uuid: %s\n", sqlite3_errstr(status));
     }
 
-    status = sqlite3_bind_text(ins_handle, 2, pst->path, -1, NULL);
+    status = sqlite3_bind_text(sql_hndls[INS], 2, pst->path, -1, NULL);
     if ( status != SQLITE_OK ) {
         errno = status;
         FAIL("Failed to bind path: %s\n", sqlite3_errstr(status));
     }
 
-    status = sqlite3_bind_int(ins_handle, 3, (signed )pst->size);
+    status = sqlite3_bind_int(sql_hndls[INS], 3, (signed )pst->size);
     if ( status != SQLITE_OK ) {
         errno = status;
         FAIL("Failed to bind size: %s\n", sqlite3_errstr(status));
     }
 
-    status = sqlite3_bind_text(ins_handle, 4, pst->hash, -1, NULL);
+    status = sqlite3_bind_text(sql_hndls[INS], 4, pst->hash, -1, NULL);
     if ( status != SQLITE_OK ) {
         errno = status;
         FAIL("Failed to bind hash: %s\n", sqlite3_errstr(status));
     }
 
-    status = sqlite3_step(ins_handle);
+    status = sqlite3_step(sql_hndls[INS]);
     if ( status != SQLITE_DONE ) {
         errno = status;
         FAIL("Failed to execute insert: %s\n", sqlite3_errstr(status));
     }
 
-    status = sqlite3_reset(ins_handle);
+    status = sqlite3_reset(sql_hndls[INS]);
     if ( status != SQLITE_OK ) {
         errno = status;
         FAIL("Failed to reset insert: %s\n", sqlite3_errstr(status));
@@ -172,19 +150,19 @@ pandabin_db_delete (struct pandabin_paste * pst) {
 
     char uuid [37] = "";
     uuid_unparse_lower(pst->uuid, uuid);
-    status = sqlite3_bind_text(rmv_handle, 1, uuid, 36, NULL);
+    status = sqlite3_bind_text(sql_hndls[RMV], 1, uuid, 36, NULL);
     if ( status != SQLITE_OK ) {
         errno = status;
         FAIL("Failed to bind uuid: %s\n", sqlite3_errstr(status));
     }
 
-    status = sqlite3_step(rmv_handle);
+    status = sqlite3_step(sql_hndls[RMV]);
     if ( status != SQLITE_DONE ) {
         errno = status;
         FAIL("Failed to execute delete: %s\n", sqlite3_errstr(status));
     }
 
-    status = sqlite3_reset(rmv_handle);
+    status = sqlite3_reset(sql_hndls[RMV]);
     if ( status != SQLITE_OK ) {
         errno = status;
         FAIL("Failed to reset delete: %s\n", sqlite3_errstr(status));
@@ -208,22 +186,22 @@ pandabin_settings_fetch (sqlite3 * db, struct pandabin_settings * settings) {
     if ( !db || !settings ) { return; }
 
     errno = 0;
-    status = sqlite3_bind_text(set_handle, 1, "max size", 8, NULL);
+    status = sqlite3_bind_text(sql_hndls[SET], 1, "max size", 8, NULL);
     if ( status != SQLITE_OK ) {
         errno = status;
         FAIL("Failed to bind name: %s\n", sqlite3_errstr(status));
     }
 
-    status = sqlite3_step(set_handle);
+    status = sqlite3_step(sql_hndls[SET]);
     if ( status != SQLITE_ROW ) {
         syslog(LOG_ERR, "Failed to retrieve setting (using default): %s\n",
                sqlite3_errstr(status));
         settings->maxsize = MAXSIZE;
     }
 
-    settings->maxsize = (size_t )sqlite3_column_int(set_handle, 1);
+    settings->maxsize = (size_t )sqlite3_column_int(sql_hndls[SET], 1);
 
-    status = sqlite3_reset(set_handle);
+    status = sqlite3_reset(sql_hndls[SET]);
     if ( status ) {
         errno = status;
         FAIL("Failed to reset setting: %s\n", sqlite3_errstr(status));
@@ -238,11 +216,10 @@ pandabin_settings_fetch (sqlite3 * db, struct pandabin_settings * settings) {
 signed
 pandabin_db_cleanup (sqlite3 * db) {
 
-    if ( ins_handle ) { sqlite3_finalize(ins_handle); }
-    if ( sel_hash_handle ) { sqlite3_finalize(sel_hash_handle); }
-    if ( sel_uuid_handle ) { sqlite3_finalize(sel_uuid_handle); }
-    if ( rmv_handle ) { sqlite3_finalize(rmv_handle); }
-    if ( set_handle ) { sqlite3_finalize(set_handle); }
+    for ( enum pandabin_tag i = INS; i < LAST; ++ i ) {
+        if ( sql_hndls[i] ) { sqlite3_finalize(sql_hndls[i]); }
+    }
+
     if ( db ) { sqlite3_close(db); }
     return EXIT_SUCCESS;
 }

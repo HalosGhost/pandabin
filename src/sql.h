@@ -28,13 +28,11 @@ pandabin_settings_fetch (sqlite3 *, struct pandabin_settings *);
 signed
 pandabin_db_cleanup (sqlite3 *);
 
-static const char
-    * ins_stmt = "insert into 'pastes' values "
-                 "(?, ?, ?, ?, strftime('%s', 'now', 'utc'));",
-    * sel_hash_stmt = "select * from pastes where hash like ?;",
-    * sel_uuid_stmt = "select * from pastes where uuid = ?;",
-    * rmv_stmt = "delete from pastes where uuid = ?;",
-    * set_stmt = "select value from settings where name = ?;";
+#define X(tag, stmt) [tag] = stmt,
+static const char * sql_stmts [] = {
+    PANDABIN_SQL_MEMBERS
+};
+#undef X
 
 static const char * pandabin_schema =
     "create table if not exists 'pastes'"

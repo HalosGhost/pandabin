@@ -14,19 +14,30 @@
 #include <sys/types.h>
 #include <stdbool.h>
 #include <lwan/lwan.h>
+
+#define PANDABIN_SQL_MEMBERS \
+    X(INS, "insert into 'pastes' values " \
+           "(?, ?, ?, ?, strftime('%s', 'now', 'utc'));") \
+    X(SEL_HASH, "select * from pastes where hash like ?;") \
+    X(SEL_UUID, "select * from pastes where uuid = ?;") \
+    X(RMV, "delete from pastes where uuid = ?;") \
+    X(SET, "select value from settings where name = ?;") \
+    X(LAST, "")
+
+#define X(tag, stmt) tag,
+enum pandabin_tag {
+    PANDABIN_SQL_MEMBERS
+};
+#undef X
+
 #include "sql.h"
 #include "paste.h"
 #include "routes.h"
 
-extern sqlite3_stmt
-    * ins_handle,
-    * sel_hash_handle,
-    * sel_uuid_handle,
-    * rmv_handle,
-    * set_handle;
+extern sqlite3_stmt * sql_hndls [LAST];
 
 // Configurables
-#define PREFIX "/opt"
+#define PREFIX "/usr/local"
 #define MAXSIZE 67108864
 
 #define PROGNM   "pandabin"
