@@ -18,7 +18,7 @@ serve_index (struct lwan_request * rq, struct lwan_response * rsp, void * d) {
 }
 
 enum lwan_http_status
-get_paste (struct lwan_request * rq, struct lwan_response * rsp, void * d) {
+read_paste (struct lwan_request * rq, struct lwan_response * rsp, void * d) {
 
     (void )d;
 
