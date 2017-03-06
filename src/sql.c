@@ -38,7 +38,7 @@ pandabin_db_init (void) {
 signed
 pandabin_db_insert (struct pandabin_paste * pst) {
 
-    signed status = EXIT_SUCCESS;
+    signed status = SQLITE_OK;
 
     char uuid [37] = "";
     uuid_unparse_lower(pst->uuid, uuid);

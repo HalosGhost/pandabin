@@ -18,6 +18,32 @@ serve_index (struct lwan_request * rq, struct lwan_response * rsp, void * d) {
 }
 
 enum lwan_http_status
+create_paste (struct lwan_request * rq, struct lwan_response * rsp, void * d) {
+
+    (void )rsp; (void )d;
+
+    enum lwan_http_status status = HTTP_OK;
+
+    if ( lwan_request_get_method(rq) != REQUEST_METHOD_POST ) {
+        goto cleanup;
+    }
+
+    struct pandabin_paste * pst = pandabin_paste_new("", 0);
+
+    if ( !pst ) { goto cleanup; }
+
+    signed s = pandabin_db_insert(pst);
+    if ( s != SQLITE_OK ) {
+        goto cleanup;
+    }
+
+    status = HTTP_OK;
+
+    cleanup:
+        return status;
+}
+
+enum lwan_http_status
 read_paste (struct lwan_request * rq, struct lwan_response * rsp, void * d) {
 
     (void )d;
