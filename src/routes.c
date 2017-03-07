@@ -28,7 +28,9 @@ create_paste (struct lwan_request * rq, struct lwan_response * rsp, void * d) {
         goto cleanup;
     }
 
-    struct pandabin_paste * pst = pandabin_paste_new("", 0);
+    const char * content = lwan_request_get_post_param(rq, "content");
+
+    struct pandabin_paste * pst = pandabin_paste_new(content, strlen(content));
 
     if ( !pst ) { goto cleanup; }
 
