@@ -25,7 +25,8 @@ main (void) {
 
     pandabin_settings_fetch(db, &settings);
 
-    //c.max_post_data_size = settings.maxsize;
+    c.max_post_data_size = settings.maxsize;
+    c.allow_post_temp_file = true;
 
     lwan_init_with_config(&l, &c);
 
