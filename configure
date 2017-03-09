@@ -104,7 +104,7 @@ for i in "$@"; do
                         update PREFIX "\"$pref\""
                         update_makevar PREFIX "$pref"
                         shift;;
-        --reset-config) default_config; break;
+        --reset-config) default_config; break;;
     esac
 done
 
