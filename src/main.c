@@ -31,7 +31,7 @@ main (void) {
     lwan_init_with_config(&l, &c);
 
     const struct lwan_url_map map [] = {
-        { .prefix = "/", .handler = serve_index },
+        { .prefix = "/", .handler = read_index },
         { .prefix = "/create", .handler = create_paste },
         { .prefix = "/read", .handler = read_paste },
         { .prefix = "/delete", .handler = delete_paste },

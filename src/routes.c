@@ -1,7 +1,7 @@
 #include "routes.h"
 
 enum lwan_http_status
-serve_index (struct lwan_request * rq, struct lwan_response * rsp, void * d) {
+read_index (struct lwan_request * rq, struct lwan_response * rsp, void * d) {
 
     (void )rq; (void )d;
 

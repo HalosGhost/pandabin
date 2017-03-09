@@ -8,7 +8,7 @@
 #include "sql.h"
 
 enum lwan_http_status
-serve_index (struct lwan_request *, struct lwan_response *, void *);
+read_index (struct lwan_request *, struct lwan_response *, void *);
 
 enum lwan_http_status
 create_paste (struct lwan_request *, struct lwan_response *, void *);
