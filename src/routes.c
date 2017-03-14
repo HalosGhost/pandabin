@@ -5,16 +5,40 @@ read_index (struct lwan_request * rq, struct lwan_response * rsp, void * d) {
 
     (void )rq; (void )d;
 
-    static const char msg [] =
-        "<!DOCTYPE html>"
-        "<html><body>"
-        "<h1>Hello, Pandas!</h1>"
-        "</body></html>";
+    FILE * f = 0;
+    char * content = 0;
+
+    enum lwan_http_status status = HTTP_OK;
+
+    content = malloc(289); // hard-coded for now
+    if ( !content ) {
+        syslog(LOG_ERR, "Failed to allocate buffer\n");
+        status = HTTP_INTERNAL_ERROR;
+        goto cleanup;
+    }
+
+    f = fopen("res/index.htm", "r");
+    if ( !f ) {
+        syslog(LOG_ERR, "Failed to open index.htm\n");
+        status = HTTP_INTERNAL_ERROR;
+        goto cleanup;
+    }
+
+    errno = 0;
+    size_t res = fread(content, 289, 1, f);
+    if ( !res ) {
+        syslog(LOG_ERR, "Failed to read content into buffer: %s\n", strerror(errno));
+        status = HTTP_INTERNAL_ERROR;
+        goto cleanup;
+    }
 
     rsp->mime_type = "text/html";
-    strbuf_set_static(rsp->buffer, msg, sizeof(msg) - 1);
+    strbuf_set(rsp->buffer, content, 289);
 
-    return HTTP_OK;
+    cleanup:
+        if ( f ) { fclose(f); }
+        if ( content ) { free(content); }
+        return status;
 }
 
 enum lwan_http_status
