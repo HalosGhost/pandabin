@@ -52,13 +52,12 @@ create_paste (struct lwan_request * rq, struct lwan_response * rsp, void * d) {
         goto cleanup;
     }
 
-    const char * content = lwan_request_get_post_param(rq, "content");
-    if ( !content ) {
+    if ( !rq->header.body ) {
         status = HTTP_BAD_REQUEST;
         goto cleanup;
     }
 
-    struct pandabin_paste * pst = pandabin_paste_new(content, strlen(content));
+    struct pandabin_paste * pst = pandabin_paste_new(rq->header.body->value, rq->header.body->len);
 
     if ( !pst ) { goto cleanup; }
 
