@@ -199,7 +199,10 @@ pandabin_settings_fetch (sqlite3 * db, struct pandabin_settings * settings) {
         settings->maxsize = MAXSIZE;
     }
 
-    settings->maxsize = (size_t )sqlite3_column_int(sql_hndls[SET], 1);
+    const char * setting = (const char * )sqlite3_column_text(sql_hndls[SET], 0);
+    if ( setting ) {
+        sscanf(setting, "%zu", &settings->maxsize);
+    }
 
     status = sqlite3_reset(sql_hndls[SET]);
     if ( status ) {

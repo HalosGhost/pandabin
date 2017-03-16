@@ -45,7 +45,7 @@ static const char * pandabin_schema =
 
     "create table if not exists 'settings'"
     "  ( 'name'    text    primary key"
-    "  , 'value'           not null"
+    "  , 'value'   text    not null"
     "  );"
 
     "insert or ignore into 'settings'"
