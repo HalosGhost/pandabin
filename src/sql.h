@@ -39,7 +39,7 @@ static const char * pandabin_schema =
     "  ( 'uuid'    text    primary key"
     "  , 'path'    text    not null"
     "  , 'size'    integer not null"
-    "  , 'hash'    text    not null"
+    "  , 'hash'    text    not null unique"
     "  , 'created' text    not null"
     "  );"
 
