@@ -79,7 +79,8 @@ read_paste (struct lwan_request * rq, struct lwan_response * rsp, void * d) {
 
     enum lwan_http_status status = HTTP_OK;
 
-    const char * hash = lwan_request_get_query_param(rq, "hash");
+    const char * hash = lwan_request_get_query_param(rq, "hash"),
+               * ext  = lwan_request_get_query_param(rq, "ext");
     FILE * f = 0;
     struct pandabin_paste * pst = 0;
     char * content = 0;
@@ -123,7 +124,7 @@ read_paste (struct lwan_request * rq, struct lwan_response * rsp, void * d) {
         goto cleanup;
     }
 
-    rsp->mime_type = "text/plain";
+    rsp->mime_type = ext ? lwan_determine_mime_type_for_file_name(ext) : "text/plain";
     strbuf_set(rsp->buffer, content, pst->size);
 
     cleanup:
