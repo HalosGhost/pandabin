@@ -30,10 +30,8 @@ simple: gen dist
 
 install:
 	@install -Dm755 dist/$(PROGNM)   $(BINDIR)/$(PROGNM)
-	@install -Dm644 dist/$(PROGNM).1 $(DOCDIR)/man1/$(PROGNM).1
 
 uninstall:
 	@rm -f $(BINDIR)/$(PROGNM)
-	@rm -f $(DOCDIR)/man1/$(PROGNM).1
 
 include Makeeaster
