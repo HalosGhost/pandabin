@@ -10,7 +10,8 @@ read_index (struct lwan_request * rq, struct lwan_response * rsp, void * d) {
 
     enum lwan_http_status status = HTTP_OK;
 
-    content = malloc(289); // hard-coded for now
+    #define INDEXSIZE 733
+    content = malloc(INDEXSIZE); // hard-coded for now
     if ( !content ) {
         syslog(LOG_ERR, "Failed to allocate buffer\n");
         status = HTTP_INTERNAL_ERROR;
@@ -25,7 +26,7 @@ read_index (struct lwan_request * rq, struct lwan_response * rsp, void * d) {
     }
 
     errno = 0;
-    size_t res = fread(content, 289, 1, f);
+    size_t res = fread(content, INDEXSIZE, 1, f);
     if ( !res ) {
         syslog(LOG_ERR, "Failed to read content into buffer: %s\n", strerror(errno));
         status = HTTP_INTERNAL_ERROR;
@@ -33,7 +34,7 @@ read_index (struct lwan_request * rq, struct lwan_response * rsp, void * d) {
     }
 
     rsp->mime_type = "text/html";
-    strbuf_set(rsp->buffer, content, 289);
+    strbuf_set(rsp->buffer, content, INDEXSIZE);
 
     cleanup:
         if ( f ) { fclose(f); }
