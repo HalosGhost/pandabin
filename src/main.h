@@ -37,7 +37,7 @@ enum pandabin_tag {
 extern sqlite3_stmt * sql_hndls [LAST];
 
 // Configurables
-#define PREFIX "/usr/local"
+#define PREFIX  "/usr/local"
 #define MAXSIZE 67108864
 
 #define PROGNM   "pandabin"
