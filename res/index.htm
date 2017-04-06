@@ -12,9 +12,18 @@
         <p>It was inspired by <a href='https://github.com/ptpb/pb'>pb</a> and ompldr (now defunct).</p>
         <h2>Routes</h2>
         <ul>
-            <li><code>POST /create</code></li>
-            <li><code>GET /read?hash=&lt;hash&gt;&amp;ext=&lt;extension&gt;</code></li>
-            <li><code>DELETE /delete?uuid=&lt;UUID&gt;</code></li>
+            <li>
+                <code>POST /create</code>
+                <p>Example: <code>curl -X POST --data-binary @.zshrc 'localhost:8080'</code></p>
+            </li>
+            <li>
+                <code>GET /read?hash=&lt;hash&gt;&amp;ext=&lt;extension&gt;</code>
+                <p>Example: <code>curl 'localhost:8080/read?hash=8e764a7a65715459d87084fa5f30e6f5209c22d42c117a7a399dc1debe6b1388'</code></p>
+            </li>
+            <li>
+                <code>DELETE /delete?uuid=&lt;UUID&gt;</code>
+                <p>Example: <code>curl -X DELETE 'localhost:8080/delete?uuid=01892f4d-995e-4fa5-9fa8-08a6d514937e'</code></p>
+            </li>
         </ul>
     </body>
 </html>
