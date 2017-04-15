@@ -138,7 +138,7 @@ pandabin_db_select (sqlite3_stmt ** handle, const char * restrict val) {
     status = EXIT_SUCCESS;
 
     cleanup:
-        sqlite3_reset(*handle);
+        if ( handle && *handle ) { sqlite3_reset(*handle); }
         if ( status != EXIT_SUCCESS ) { pandabin_paste_free(&pst); }
         return pst;
 }
@@ -209,8 +209,6 @@ pandabin_settings_fetch (sqlite3 * db, struct pandabin_settings * settings) {
         errno = status;
         FAIL("Failed to reset setting: %s\n", sqlite3_errstr(status));
     }
-
-    status = EXIT_SUCCESS;
 
     cleanup:
         return;
