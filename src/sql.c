@@ -1,12 +1,12 @@
 #include "sql.h"
 
 sqlite3 *
-pandabin_db_init (void) {
+pandabin_db_init (const char * path) {
 
     signed status = EXIT_SUCCESS;
     sqlite3 * db = 0;
 
-    status = sqlite3_open(DBPATH, &db);
+    status = sqlite3_open(path, &db);
     if ( status != SQLITE_OK ) {
         errno = status;
         FAIL("Failed to open database: %s\n", sqlite3_errmsg(db));
@@ -209,6 +209,30 @@ pandabin_settings_fetch (sqlite3 * db) {
         FAIL("Failed to reset setting: %s\n", sqlite3_errstr(status));
     }
 
+    errno = 0;
+    status = sqlite3_bind_text(sql_hndls[SET], 1, "file path", 9, NULL);
+    if ( status != SQLITE_OK ) {
+        errno = status;
+        FAIL("Failed to bind name: %s\n", sqlite3_errstr(status));
+    }
+
+    status = sqlite3_step(sql_hndls[SET]);
+    if ( status != SQLITE_ROW ) {
+        syslog(LOG_ERR, "Failed to retrieve setting (using default): %s\n",
+               sqlite3_errstr(status));
+        snprintf(settings.file_path, PATH_MAX - 1, "%s", FILEPATH);
+    }
+
+    setting = (const char * )sqlite3_column_text(sql_hndls[SET], 0);
+    if ( setting ) {
+        sscanf(setting, "%s", settings.file_path);
+    }
+
+    status = sqlite3_reset(sql_hndls[SET]);
+    if ( status ) {
+        errno = status;
+        FAIL("Failed to reset setting: %s\n", sqlite3_errstr(status));
+    }
     cleanup:
         return;
 }

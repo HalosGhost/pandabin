@@ -18,16 +18,18 @@ main (void) {
     struct lwan l;
     struct lwan_config c = *lwan_get_default_config();
 
-    status = pandabin_dir_init();
-    if ( status != EXIT_SUCCESS ) { goto cleanup; }
-
-    db = pandabin_db_init();
+    db = pandabin_db_init(PREFIX "/" PROGNM "/db.sqlite");
     if ( !db ) { status = EXIT_FAILURE; goto cleanup; }
 
     pandabin_settings_fetch(db);
+    printf("%s\n", settings.file_path);
+    printf("%zu\n", settings.maxsize);
 
     c.max_post_data_size = settings.maxsize;
     c.allow_post_temp_file = true;
+
+    status = pandabin_dir_init();
+    if ( status != EXIT_SUCCESS ) { goto cleanup; }
 
     lwan_init_with_config(&l, &c);
 
@@ -62,35 +64,35 @@ pandabin_dir_init (void) {
     }
 
     errno = 0;
-    if ( chdir(PREFIX) == -1 ) {
-        FAIL("Failed to cd to %s: %s\n", PREFIX, strerror(status));
+    if ( chdir(settings.file_path) == -1 ) {
+        FAIL("Failed to cd to %s: %s\n", settings.file_path, strerror(status));
     }
 
     errno = 0;
-    if ( chdir(MAINPATH) == -1 ) {
-        syslog(LOG_INFO, "Failed to cd to %s: %s\n", MAINPATH, strerror(errno));
+    if ( chdir("pandabin") == -1 ) {
+        syslog(LOG_INFO, "Failed to cd to pandabin: %s\n", strerror(errno));
 
         errno = 0;
-        if ( mkdir(MAINPATH, 0777) == -1 ) {
-            FAIL("Failed to create %s: %s\n", MAINPATH, strerror(status));
-        } syslog(LOG_INFO, "Created %s\n", MAINPATH);
+        if ( mkdir("pandabin", 0777) == -1 ) {
+            FAIL("Failed to create pandabin: %s\n", strerror(status));
+        } syslog(LOG_INFO, "Created pandabin\n");
 
         errno = 0;
-        if ( chdir(MAINPATH) == -1 ) {
-            FAIL("Failed to cd to %s: %s\n", MAINPATH, strerror(status));
+        if ( chdir("pandabin") == -1 ) {
+            FAIL("Failed to cd to pandabin: %s\n", strerror(status));
         }
     }
 
     errno = 0;
-    if ( chdir(FILEPATH) == -1 ) {
-        syslog(LOG_INFO, "Failed to cd to %s: %s\n", FILEPATH, strerror(errno));
+    if ( chdir("files") == -1 ) {
+        syslog(LOG_INFO, "Failed to cd to files: %s\n", strerror(errno));
 
         errno = 0;
-        if ( mkdir(FILEPATH, 0777) == -1 ) {
-            FAIL("Failed to create %s: %s\n", FILEPATH, strerror(status));
+        if ( mkdir("files", 0777) == -1 ) {
+            FAIL("Failed to create files: %s\n", strerror(status));
         }
 
-        syslog(LOG_INFO, "Created %s\n", FILEPATH);
+        syslog(LOG_INFO, "Created files\n");
     }
 
     cleanup:

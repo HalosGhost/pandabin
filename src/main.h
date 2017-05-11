@@ -38,13 +38,10 @@ extern sqlite3_stmt * sql_hndls [LAST];
 extern struct pandabin_settings settings;
 
 // Configurables
-#define PREFIX  "/usr/local"
-#define MAXSIZE 67108864
-
+#define PREFIX   "/home/halosghost"
+#define MAXSIZE  67108864
 #define PROGNM   "pandabin"
-#define MAINPATH PREFIX "/" PROGNM
-#define DBPATH   MAINPATH "/db.sqlite"
-#define FILEPATH MAINPATH "/files"
+#define FILEPATH PREFIX "/" PROGNM "/files"
 
 #define FAIL(...) do { \
     status = errno; \

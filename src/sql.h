@@ -8,12 +8,12 @@
 
 struct pandabin_settings {
     const char * instance_name;
-    const char * file_path;
+    char file_path [PATH_MAX];
     size_t maxsize;
 };
 
 sqlite3 *
-pandabin_db_init (void);
+pandabin_db_init (const char *);
 
 signed
 pandabin_db_insert (struct pandabin_paste *);
@@ -51,7 +51,7 @@ static const char * pandabin_schema =
 
     "insert or ignore into 'settings' values"
     "  ('max size', 67108864),"
-    "  ('instance name', localhost),"
-    "  ('file path', '/usr/local/pandabin/files');";
+    "  ('instance name', 'localhost'),"
+    "  ('file path', '/usr/local');";
 
 #endif
