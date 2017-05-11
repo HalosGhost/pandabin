@@ -7,6 +7,8 @@
 #include "paste.h"
 
 struct pandabin_settings {
+    const char * instance_name;
+    const char * file_path;
     size_t maxsize;
 };
 
@@ -23,7 +25,7 @@ signed
 pandabin_db_delete (struct pandabin_paste *);
 
 void
-pandabin_settings_fetch (sqlite3 *, struct pandabin_settings *);
+pandabin_settings_fetch (sqlite3 *);
 
 signed
 pandabin_db_cleanup (sqlite3 *);
@@ -37,7 +39,6 @@ static const char * sql_stmts [] = {
 static const char * pandabin_schema =
     "create table if not exists 'pastes'"
     "  ( 'uuid'    text    primary key"
-    "  , 'path'    text    not null"
     "  , 'size'    integer not null"
     "  , 'hash'    text    not null unique"
     "  , 'created' text    not null"

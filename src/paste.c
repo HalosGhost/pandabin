@@ -32,13 +32,14 @@ pandabin_paste_new (const char * content, size_t size) {
     uuid_generate(pst->uuid);
     pst->size = size;
 
-    size_t pathlen = strlen(FILEPATH) + 5;
-    pst->path = malloc(pathlen + 65);
-    if ( !pst->path ) {
+    size_t pathlen = strlen(settings.file_path) + 5;
+    char * path = malloc(pathlen + 71);
+    if ( !path ) {
         FAIL("Failed to allocate path: %s\n", strerror(status));
     }
 
-    s = snprintf(pst->path, pathlen, "%s/%.3s", FILEPATH, pst->hash);
+    s = snprintf(path, pathlen, "%s/%.3s", settings.file_path, pst->hash);
+
     if ( s < 0 ) {
         errno = EXIT_FAILURE;
         FAIL("Failed to store path to subdirectory\n");
@@ -51,17 +52,17 @@ pandabin_paste_new (const char * content, size_t size) {
     }
 
     errno = 0;
-    if ( chdir(pst->path) == -1 ) {
-        syslog(LOG_INFO, "Failed to cd to %s: %s\n", pst->path, strerror(errno));
+    if ( chdir(path) == -1 ) {
+        syslog(LOG_INFO, "Failed to cd to %s: %s\n", path, strerror(errno));
 
         errno = 0;
-        if ( mkdir(pst->path, 0777) == -1 ) {
-            FAIL("Failed to create %s: %s\n", pst->path, strerror(status));
-        } syslog(LOG_INFO, "Created %s\n", pst->path);
+        if ( mkdir(path, 0777) == -1 ) {
+            FAIL("Failed to create %s: %s\n", path, strerror(status));
+        } syslog(LOG_INFO, "Created %s\n", path);
 
         errno = 0;
-        if ( chdir(pst->path) == -1 ) {
-            FAIL("Failed to cd to %s: %s\n", pst->path, strerror(status));
+        if ( chdir(path) == -1 ) {
+            FAIL("Failed to cd to %s: %s\n", path, strerror(status));
         }
     }
 
@@ -71,13 +72,13 @@ pandabin_paste_new (const char * content, size_t size) {
     }
 
     // `+ 1` and `- 1` to account for the NUL byte
-    s = snprintf(pst->path + pathlen - 1, 65 + 1, "/%s", pst->hash);
+    s = snprintf(path + pathlen - 1, 71 + 1, "/%s", pst->hash);
     if ( s < 0 ) {
         errno = EXIT_FAILURE;
         FAIL("Failed to store path path to file\n");
     }
 
-    FILE * f = fopen(pst->path, "w+");
+    FILE * f = fopen(path, "w+");
     if ( !f ) {
         FAIL("%s: %s\n", "Failed to open file", strerror(status));
     }
@@ -101,8 +102,6 @@ pandabin_paste_free (struct pandabin_paste ** pst) {
     if ( pst && *pst ) {
         if ( (*pst)->hash ) { free((*pst)->hash); }
         (*pst)->hash = 0;
-        if ( (*pst)->path ) { free((*pst)->path); }
-        (*pst)->path = 0;
         free(*pst);
         *pst = 0;
     }

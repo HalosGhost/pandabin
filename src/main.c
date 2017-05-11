@@ -5,6 +5,8 @@ pandabin_dir_init (void);
 
 sqlite3_stmt * sql_hndls [LAST];
 
+struct pandabin_settings settings;
+
 signed
 main (void) {
 
@@ -15,7 +17,6 @@ main (void) {
     sqlite3 * db = 0;
     struct lwan l;
     struct lwan_config c = *lwan_get_default_config();
-    struct pandabin_settings settings;
 
     status = pandabin_dir_init();
     if ( status != EXIT_SUCCESS ) { goto cleanup; }
@@ -23,7 +24,7 @@ main (void) {
     db = pandabin_db_init();
     if ( !db ) { status = EXIT_FAILURE; goto cleanup; }
 
-    pandabin_settings_fetch(db, &settings);
+    pandabin_settings_fetch(db);
 
     c.max_post_data_size = settings.maxsize;
     c.allow_post_temp_file = true;

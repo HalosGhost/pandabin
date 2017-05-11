@@ -79,6 +79,7 @@ read_paste (struct lwan_request * rq, struct lwan_response * rsp, void * d) {
     (void )d;
 
     enum lwan_http_status status = HTTP_OK;
+    signed s = EXIT_SUCCESS;
 
     const char * hash = lwan_request_get_query_param(rq, "hash"),
                * ext  = lwan_request_get_query_param(rq, "ext");
@@ -110,7 +111,25 @@ read_paste (struct lwan_request * rq, struct lwan_response * rsp, void * d) {
         goto cleanup;
     }
 
-    f = fopen(pst->path, "r");
+    size_t pathlen = strlen(settings.file_path) + 71;
+    char * path = malloc(pathlen);
+    if ( !path ) {
+        s = errno;
+        syslog(LOG_ERR, "Failed to allocate path: %s\n", strerror(s));
+        status = HTTP_INTERNAL_ERROR;
+        goto cleanup;
+    }
+
+    s = snprintf(path, pathlen, "%s/%.3s/%s",
+                 settings.file_path, pst->hash, pst->hash);
+
+    if ( s < 0 ) {
+        syslog(LOG_ERR, "Failed to store path\n");
+        status = HTTP_INTERNAL_ERROR;
+        goto cleanup;
+    }
+
+    f = fopen(path, "r");
     if ( !f ) {
         syslog(LOG_ERR, "Failed to open paste\n");
         status = HTTP_INTERNAL_ERROR;

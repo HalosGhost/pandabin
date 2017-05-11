@@ -7,7 +7,7 @@
 #include <uuid/uuid.h>
 
 struct pandabin_paste {
-    char * hash, * path;
+    char * hash;
     uuid_t uuid;
     size_t size;
 };

@@ -48,12 +48,6 @@ pandabin_db_insert (struct pandabin_paste * pst) {
         FAIL("Failed to bind uuid: %s\n", sqlite3_errstr(status));
     }
 
-    status = sqlite3_bind_text(sql_hndls[INS], 2, pst->path, -1, NULL);
-    if ( status != SQLITE_OK ) {
-        errno = status;
-        FAIL("Failed to bind path: %s\n", sqlite3_errstr(status));
-    }
-
     status = sqlite3_bind_int(sql_hndls[INS], 3, (signed )pst->size);
     if ( status != SQLITE_OK ) {
         errno = status;
@@ -103,12 +97,6 @@ pandabin_db_select (sqlite3_stmt ** handle, const char * restrict val) {
         FAIL("Failed to allocate hash hexdigest: %s\n", strerror(ENOMEM));
     }
 
-    size_t pathlen = strlen(FILEPATH) + 71;
-    pst->path = malloc(pathlen);
-    if ( !pst->path ) {
-        FAIL("Failed to allocate path: %s\n", strerror(ENOMEM));
-    }
-
     status = sqlite3_bind_text(*handle, 1, val, -1, NULL);
     if ( status != SQLITE_OK ) {
         errno = status;
@@ -128,12 +116,9 @@ pandabin_db_select (sqlite3_stmt ** handle, const char * restrict val) {
         FAIL("Failed to parse uuid: %s\n", "unknown error");
     }
 
-    strncpy(pst->path, (const char * )sqlite3_column_text(*handle, 1),
-                       pathlen);
+    pst->size = (size_t )sqlite3_column_int(*handle, 1);
 
-    pst->size = (size_t )sqlite3_column_int(*handle, 2);
-
-    strncpy(pst->hash, (const char * )sqlite3_column_text(*handle, 3), 65);
+    strncpy(pst->hash, (const char * )sqlite3_column_text(*handle, 2), 65);
 
     status = EXIT_SUCCESS;
 
@@ -168,7 +153,21 @@ pandabin_db_delete (struct pandabin_paste * pst) {
         FAIL("Failed to reset delete: %s\n", sqlite3_errstr(status));
     }
 
-    status = unlink(pst->path);
+    size_t pathlen = strlen(settings.file_path) + 71;
+    char * path = malloc(pathlen);
+    if ( !path ) {
+        FAIL("Failed to allocate path: %s\n", strerror(status));
+    }
+
+    status = snprintf(path, pathlen, "%s/%.3s/%s",
+                      settings.file_path, pst->hash, pst->hash);
+
+    if ( status < 0 ) {
+        errno = EXIT_FAILURE;
+        FAIL("Failed to store path\n");
+    }
+
+    status = unlink(path);
     if ( status ) {
         FAIL("Failed to delete paste content: %s\n", strerror(status));
     }
@@ -180,10 +179,10 @@ pandabin_db_delete (struct pandabin_paste * pst) {
 }
 
 void
-pandabin_settings_fetch (sqlite3 * db, struct pandabin_settings * settings) {
+pandabin_settings_fetch (sqlite3 * db) {
 
     signed status = EXIT_SUCCESS;
-    if ( !db || !settings ) { return; }
+    if ( !db ) { return; }
 
     errno = 0;
     status = sqlite3_bind_text(sql_hndls[SET], 1, "max size", 8, NULL);
@@ -196,12 +195,12 @@ pandabin_settings_fetch (sqlite3 * db, struct pandabin_settings * settings) {
     if ( status != SQLITE_ROW ) {
         syslog(LOG_ERR, "Failed to retrieve setting (using default): %s\n",
                sqlite3_errstr(status));
-        settings->maxsize = MAXSIZE;
+        settings.maxsize = MAXSIZE;
     }
 
     const char * setting = (const char * )sqlite3_column_text(sql_hndls[SET], 0);
     if ( setting ) {
-        sscanf(setting, "%zu", &settings->maxsize);
+        sscanf(setting, "%zu", &settings.maxsize);
     }
 
     status = sqlite3_reset(sql_hndls[SET]);
