@@ -48,13 +48,13 @@ pandabin_db_insert (struct pandabin_paste * pst) {
         FAIL("Failed to bind uuid: %s\n", sqlite3_errstr(status));
     }
 
-    status = sqlite3_bind_int(sql_hndls[INS], 3, (signed )pst->size);
+    status = sqlite3_bind_int(sql_hndls[INS], 2, (signed )pst->size);
     if ( status != SQLITE_OK ) {
         errno = status;
         FAIL("Failed to bind size: %s\n", sqlite3_errstr(status));
     }
 
-    status = sqlite3_bind_text(sql_hndls[INS], 4, pst->hash, -1, NULL);
+    status = sqlite3_bind_text(sql_hndls[INS], 3, pst->hash, -1, NULL);
     if ( status != SQLITE_OK ) {
         errno = status;
         FAIL("Failed to bind hash: %s\n", sqlite3_errstr(status));
