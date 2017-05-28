@@ -10,7 +10,7 @@ read_index (struct lwan_request * rq, struct lwan_response * rsp, void * d) {
 
     enum lwan_http_status status = HTTP_OK;
 
-    #define INDEXSIZE 733
+    #define INDEXSIZE 1188
     content = malloc(INDEXSIZE); // hard-coded for now
     if ( !content ) {
         syslog(LOG_ERR, "Failed to allocate buffer\n");
