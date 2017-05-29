@@ -30,6 +30,9 @@ pandabin_settings_fetch (sqlite3 *);
 signed
 pandabin_db_cleanup (sqlite3 *);
 
+char *
+pandabin_paste_path (const char *);
+
 #define X(tag, stmt) [tag] = stmt,
 static const char * sql_stmts [] = {
     PANDABIN_SQL_MEMBERS

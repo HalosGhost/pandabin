@@ -132,6 +132,7 @@ signed
 pandabin_db_delete (struct pandabin_paste * pst) {
 
     signed status = EXIT_SUCCESS;
+    char * path = 0;
 
     char uuid [37] = "";
     uuid_unparse_lower(pst->uuid, uuid);
@@ -153,18 +154,9 @@ pandabin_db_delete (struct pandabin_paste * pst) {
         FAIL("Failed to reset delete: %s\n", sqlite3_errstr(status));
     }
 
-    size_t pathlen = strlen(settings.file_path) + 71;
-    char * path = malloc(pathlen);
+    path = pandabin_paste_path(pst->hash);
     if ( !path ) {
-        FAIL("Failed to allocate path: %s\n", strerror(status));
-    }
-
-    status = snprintf(path, pathlen, "%s/%.3s/%s",
-                      settings.file_path, pst->hash, pst->hash);
-
-    if ( status < 0 ) {
-        errno = EXIT_FAILURE;
-        FAIL("Failed to store path\n");
+        FAIL("Failed to retrieve path: %s\n", strerror(status));
     }
 
     status = unlink(path);
@@ -175,6 +167,7 @@ pandabin_db_delete (struct pandabin_paste * pst) {
     status = EXIT_SUCCESS;
 
     cleanup:
+        if ( path ) { free(path); }
         return status;
 }
 
@@ -247,3 +240,42 @@ pandabin_db_cleanup (sqlite3 * db) {
     if ( db ) { sqlite3_close(db); }
     return EXIT_SUCCESS;
 }
+
+char *
+pandabin_paste_path (const char * hash) {
+
+    signed status = EXIT_SUCCESS;
+    char * path = 0;
+
+    if ( !hash ) {
+        syslog(LOG_ERR, "Specified hash was NULL\n");
+        status = EXIT_FAILURE;
+        goto cleanup;
+    }
+
+    size_t pathlen = strlen(settings.file_path) + 91;
+    path = malloc(pathlen);
+    if ( !path ) {
+        status = errno;
+        syslog(LOG_ERR, "Failed to allocate path: %s\n", strerror(status));
+        goto cleanup;
+    }
+
+    status = snprintf(path, pathlen, "%s/pandabin/files/%.3s/%s",
+                      settings.file_path, hash, hash);
+
+    if ( status < 0 ) {
+        syslog(LOG_ERR, "Failed to store path\n");
+        status = EXIT_FAILURE;
+        goto cleanup;
+    }
+
+    status = EXIT_SUCCESS;
+    syslog(LOG_INFO, "Paste path: %s\n", path);
+
+    cleanup:
+        if ( status != EXIT_SUCCESS ) {
+            if ( path ) { free(path); path = NULL; }
+        } return path;
+}
+

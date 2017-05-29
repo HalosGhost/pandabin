@@ -32,13 +32,14 @@ pandabin_paste_new (const char * content, size_t size) {
     uuid_generate(pst->uuid);
     pst->size = size;
 
-    size_t pathlen = strlen(settings.file_path) + 5;
+    size_t pathlen = strlen(settings.file_path) + 20;
     char * path = malloc(pathlen + 71);
     if ( !path ) {
         FAIL("Failed to allocate path: %s\n", strerror(status));
     }
 
-    s = snprintf(path, pathlen, "%s/%.3s", settings.file_path, pst->hash);
+    s = snprintf(path, pathlen, "%s/pandabin/files/%.3s",
+                 settings.file_path, pst->hash);
 
     if ( s < 0 ) {
         errno = EXIT_FAILURE;
@@ -72,7 +73,7 @@ pandabin_paste_new (const char * content, size_t size) {
     }
 
     // `+ 1` and `- 1` to account for the NUL byte
-    s = snprintf(path + pathlen - 1, 71 + 1, "/%s", pst->hash);
+    s = snprintf(path + pathlen - 1, 91 + 1, "/%s", pst->hash);
     if ( s < 0 ) {
         errno = EXIT_FAILURE;
         FAIL("Failed to store path path to file\n");

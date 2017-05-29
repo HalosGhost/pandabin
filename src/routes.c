@@ -86,6 +86,7 @@ read_paste (struct lwan_request * rq, struct lwan_response * rsp, void * d) {
     FILE * f = 0;
     struct pandabin_paste * pst = 0;
     char * content = 0;
+    char * path = 0;
 
     if ( lwan_request_get_method(rq) != REQUEST_METHOD_GET ) {
         goto cleanup;
@@ -111,20 +112,10 @@ read_paste (struct lwan_request * rq, struct lwan_response * rsp, void * d) {
         goto cleanup;
     }
 
-    size_t pathlen = strlen(settings.file_path) + 71;
-    char * path = malloc(pathlen);
+    path = pandabin_paste_path(hash);
     if ( !path ) {
         s = errno;
-        syslog(LOG_ERR, "Failed to allocate path: %s\n", strerror(s));
-        status = HTTP_INTERNAL_ERROR;
-        goto cleanup;
-    }
-
-    s = snprintf(path, pathlen, "%s/%.3s/%s",
-                 settings.file_path, pst->hash, pst->hash);
-
-    if ( s < 0 ) {
-        syslog(LOG_ERR, "Failed to store path\n");
+        syslog(LOG_ERR, "Failed to retrieve path: %s\n", strerror(s));
         status = HTTP_INTERNAL_ERROR;
         goto cleanup;
     }
@@ -151,6 +142,7 @@ read_paste (struct lwan_request * rq, struct lwan_response * rsp, void * d) {
         if ( f ) { fclose(f); }
         if ( content ) { free(content); }
         if ( pst ) { pandabin_paste_free(&pst); }
+        if ( path ) { free(path); }
         return status;
 }
 
