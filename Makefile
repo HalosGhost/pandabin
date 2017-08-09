@@ -1,5 +1,5 @@
 PROGNM  =  pandabin
-PREFIX  ?= /home/halosghost
+PREFIX  ?= /usr/local
 DOCDIR  ?= $(DESTDIR)$(PREFIX)/share/man
 LIBDIR  ?= $(DESTDIR)$(PREFIX)/lib
 BINDIR  ?= $(DESTDIR)$(PREFIX)/bin
