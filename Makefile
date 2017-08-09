@@ -18,6 +18,9 @@ dist:
 gen: clean
 	@tup generate make.sh
 
+complexity:
+	@complexity -h ./src/*
+
 cov-build: gen dist
 	@cov-build --dir cov-int ./make.sh
 	@tar czvf $(PROGNM).tgz cov-int
