@@ -38,7 +38,7 @@ extern sqlite3_stmt * sql_hndls [LAST];
 extern struct pandabin_settings settings;
 
 // Configurables
-#define PREFIX   "/home/halosghost"
+#define PREFIX   "/usr/local"
 #define MAXSIZE  67108864
 #define PROGNM   "pandabin"
 #define FILEPATH PREFIX "/" PROGNM "/files"
