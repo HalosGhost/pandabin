@@ -18,7 +18,7 @@ main (void) {
     struct lwan l;
     struct lwan_config c = *lwan_get_default_config();
 
-    db = pandabin_db_init(PREFIX "/" PROGNM "/db.sqlite");
+    db = pandabin_db_init(PROGNM "/db.sqlite");
     if ( !db ) { status = EXIT_FAILURE; goto cleanup; }
 
     pandabin_settings_fetch(db);
@@ -102,4 +102,3 @@ pandabin_dir_init (void) {
             syslog(LOG_ERR, "Failed to cd to %s: %s\n", cwd, strerror(status));
         } return status;
 }
-

@@ -55,6 +55,6 @@ static const char * pandabin_schema =
     "insert or ignore into 'settings' values"
     "  ('max size', 67108864),"
     "  ('instance name', 'localhost'),"
-    "  ('file path', '/usr/local');";
+    "  ('file path', '.');";
 
 #endif
