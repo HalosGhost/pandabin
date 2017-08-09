@@ -6,6 +6,12 @@ pandabin_db_init (const char * path) {
     signed status = EXIT_SUCCESS;
     sqlite3 * db = 0;
 
+    status = sqlite3_config(SQLITE_CONFIG_SERIALIZED);
+    if ( status != SQLITE_OK ) {
+        errno = status;
+        FAIL("incompatible non-threadsafe sqlite");
+    }
+
     status = sqlite3_open(path, &db);
     if ( status != SQLITE_OK ) {
         errno = status;
@@ -278,4 +284,3 @@ pandabin_paste_path (const char * hash) {
             if ( path ) { free(path); path = NULL; }
         } return path;
 }
-
