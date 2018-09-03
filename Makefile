@@ -1,5 +1,5 @@
 PROGNM  =  pbin
-PREFIX  ?= /srv/http
+PREFIX  ?= /usr/local
 MAINDIR ?= $(DESTDIR)$(PREFIX)
 SVCDIR  ?= $(DESTDIR)/usr/lib/systemd/system/
 BINDIR  ?= $(DESTDIR)/usr/bin
