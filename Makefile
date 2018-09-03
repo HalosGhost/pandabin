@@ -1,40 +1,80 @@
-PROGNM  =  pandabin
-PREFIX  ?= /usr/local
-DOCDIR  ?= $(DESTDIR)$(PREFIX)/share/man
-LIBDIR  ?= $(DESTDIR)$(PREFIX)/lib
-BINDIR  ?= $(DESTDIR)$(PREFIX)/bin
+PROGNM  =  pbin
+PREFIX  ?= /srv/http
+MAINDIR ?= $(DESTDIR)$(PREFIX)
+SVCDIR  ?= $(DESTDIR)/usr/lib/systemd/system/
+BINDIR  ?= $(DESTDIR)/usr/bin
+TARGET  ?= oceanus.halosgho.st
 
-.PHONY: all clean gen clang-analyze cov-build simple install uninstall
+include Makerules
 
-all: dist
-	@tup upd
+.PHONY: all bin clean complexity clang-analyze cov-build res minify install uninstall
+
+all: dist bin res minify
+
+bin: dist
+	@(cd src; \
+		$(CC) $(CFLAGS) $(LDFLAGS) $(SOURCES) -o ../dist/$(PROGNM) \
+	)
+	#@(cd src; \
+		#$(CC) $(CFLAGS) $(LDFLAGS) redirector.c -o ../dist/hgredirector \
+	#)
+
+clang-analyze:
+	@(cd ./src; clang-check -analyze ./*.c)
 
 clean:
-	@rm -rf -- dist cov-int $(PROGNM).tgz make.sh ./src/*.plist
-
-dist:
-	@mkdir -p ./dist
-
-gen: clean
-	@tup generate make.sh
+	@rm -rf -- dist cov-int $(PROGNM).tgz ./src/*.plist \
+	@rm -rf -- bld/{lwan-git,acme-client-git,hitch-git,pkg,src,packages,halosgho.st}
 
 complexity:
 	@complexity -h ./src/*
 
-cov-build: gen dist
-	@cov-build --dir cov-int ./make.sh
+cov-build: clean dist
+	@cov-build --dir cov-int make
 	@tar czvf $(PROGNM).tgz cov-int
 
-clang-analyze:
-	@(pushd ./src; clang-check -analyze ./*.c)
+dist:
+	@mkdir -p dist/.well-known/acme-challenge
 
-simple: gen dist
-	@./make.sh
+res: dist
+	@cp -a --no-preserve=ownership pages dist/
+	#@cp -a --no-preserve=ownership media dist/
+	@cp -a --no-preserve=ownership assets dist/
+	@cp -a --no-preserve=ownership conf/* dist/
 
-install:
-	@install -Dm755 dist/$(PROGNM)   $(BINDIR)/$(PROGNM)
+minify: res
+	@(cd dist; \
+	for i in assets/*.css pages/*.htm; do \
+		mv "$$i" "$$i".bak; \
+		sed -E 's/^\s+//g' "$$i".bak | tr -d '\n' > "$$i"; \
+		rm "$$i".bak; \
+	done)
+
+install: all
+	@mkdir -p $(BINDIR) $(SVCDIR) $(MAINDIR)
+	@cp -a --no-preserve=ownership dist/* $(MAINDIR)/
+	@cp -a --no-preserve=ownership svc/* $(SVCDIR)/
+	@install -Dm755 website $(BINDIR)/website
+
+deploy:
+	@(pushd bld; \
+	mkdir -p packages; \
+	for i in lwan-git hitch-git acme-client-git; do \
+		cower -df "$$i" --ignorerepo &> /dev/null; \
+		pushd "$$i"; \
+		PKGDEST=../packages makepkg -s; \
+		popd; \
+		echo "$$i: built"; \
+	done; \
+	PKGDEST=packages makepkg -s; \
+	scp -r packages $(TARGET):/home/halosghost/; \
+	#ssh $(TARGET) sudo pacman -U packages/*; \
+	)
 
 uninstall:
-	@rm -f $(BINDIR)/$(PROGNM)
+	@rm -rf -- $(MAINDIR)/{assets,media,pages,.well-known}
+	@rm -f  -- $(MAINDIR)/{$(PROGNM),hgredirector}{,.conf}
+	@rm -f  -- $(SVCDIR)/{$(PROGNM),hgredirector}.service
+	@rm -f  -- $(BINDIR)/website
 
 include Makeeaster
