@@ -5,28 +5,29 @@ read_index (struct lwan_request * rq, struct lwan_response * rsp, void * d) {
 
     (void )rq; (void )d;
 
-    FILE * f = 0;
     char * content = 0;
-
     enum lwan_http_status status = HTTP_OK;
 
-    #define INDEXSIZE 1188
-    content = malloc(INDEXSIZE); // hard-coded for now
-    if ( !content ) {
-        syslog(LOG_ERR, "Failed to allocate buffer\n");
-        status = HTTP_INTERNAL_ERROR;
-        goto cleanup;
-    }
-
-    f = fopen("res/index.htm", "r");
+    FILE * f = fopen("pages/index.htm", "r");
     if ( !f ) {
         syslog(LOG_ERR, "Failed to open index.htm\n");
         status = HTTP_INTERNAL_ERROR;
         goto cleanup;
     }
 
+    fseek(f, 0, SEEK_END);
+    size_t size = (size_t )ftell(f);
+    rewind(f);
+
+    content = malloc((size_t )size + 1);
+    if ( !content ) {
+        syslog(LOG_ERR, "Failed to allocate buffer\n");
+        status = HTTP_INTERNAL_ERROR;
+        goto cleanup;
+    }
+
     errno = 0;
-    size_t res = fread(content, INDEXSIZE, 1, f);
+    size_t res = fread(content, size, 1, f);
     if ( !res ) {
         syslog(LOG_ERR, "Failed to read content into buffer: %s\n", strerror(errno));
         status = HTTP_INTERNAL_ERROR;
@@ -34,7 +35,7 @@ read_index (struct lwan_request * rq, struct lwan_response * rsp, void * d) {
     }
 
     rsp->mime_type = "text/html";
-    strbuf_set(rsp->buffer, content, INDEXSIZE);
+    lwan_strbuf_set_static(rsp->buffer, content, size);
 
     cleanup:
         if ( f ) { fclose(f); }
@@ -136,7 +137,7 @@ read_paste (struct lwan_request * rq, struct lwan_response * rsp, void * d) {
     }
 
     rsp->mime_type = ext ? lwan_determine_mime_type_for_file_name(ext) : "text/plain";
-    strbuf_set(rsp->buffer, content, pst->size);
+    lwan_strbuf_set_static(rsp->buffer, content, pst->size);
 
     cleanup:
         if ( f ) { fclose(f); }
@@ -174,7 +175,7 @@ delete_paste (struct lwan_request * rq, struct lwan_response * rsp, void * d) {
     }
 
     rsp->mime_type = "text/plain";
-    strbuf_set_static(rsp->buffer, "paste deleted", 13);
+    lwan_strbuf_set_static(rsp->buffer, "paste deleted", 13);
 
     cleanup:
         return status;
