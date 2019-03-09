@@ -1,9 +1,10 @@
-PROGNM  =  pbin
-PREFIX  ?= /usr/local
+PROGNM  =  hgweb
+PREFIX  ?= /srv/http
 MAINDIR ?= $(DESTDIR)$(PREFIX)
 SVCDIR  ?= $(DESTDIR)/usr/lib/systemd/system/
 BINDIR  ?= $(DESTDIR)/usr/bin
 TARGET  ?= oceanus.halosgho.st
+PORT    ?= 2222
 
 include Makerules
 
@@ -15,15 +16,15 @@ bin: dist
 	@(cd src; \
 		$(CC) $(CFLAGS) $(LDFLAGS) $(SOURCES) -o ../dist/$(PROGNM) \
 	)
-	#@(cd src; \
-		#$(CC) $(CFLAGS) $(LDFLAGS) redirector.c -o ../dist/hgredirector \
-	#)
+	@(cd src; \
+		$(CC) $(CFLAGS) $(LDFLAGS) redirector.c -o ../dist/hgredirector \
+	)
 
 clang-analyze:
 	@(cd ./src; clang-check -analyze ./*.c)
 
 clean:
-	@rm -rf -- dist cov-int $(PROGNM).tgz ./src/*.plist \
+	@rm -rf -- dist cov-int $(PROGNM).tgz ./src/*.plist
 	@rm -rf -- bld/{lwan-git,acme-client-git,hitch-git,pkg,src,packages,halosgho.st}
 
 complexity:
@@ -38,13 +39,12 @@ dist:
 
 res: dist
 	@cp -a --no-preserve=ownership pages dist/
-	#@cp -a --no-preserve=ownership media dist/
+	@cp -a --no-preserve=ownership media dist/
 	@cp -a --no-preserve=ownership assets dist/
-	@cp -a --no-preserve=ownership conf/* dist/
 
 minify: res
 	@(cd dist; \
-	for i in assets/*.css pages/*.htm; do \
+	for i in assets/*.css pages/*.html; do \
 		mv "$$i" "$$i".bak; \
 		sed -E 's/^\s+//g' "$$i".bak | tr -d '\n' > "$$i"; \
 		rm "$$i".bak; \
@@ -54,7 +54,7 @@ install: all
 	@mkdir -p $(BINDIR) $(SVCDIR) $(MAINDIR)
 	@cp -a --no-preserve=ownership dist/* $(MAINDIR)/
 	@cp -a --no-preserve=ownership svc/* $(SVCDIR)/
-	@install -Dm755 website $(BINDIR)/website
+	@install -m755 -t $(BINDIR) bin/*
 
 deploy:
 	@(pushd bld; \
@@ -67,13 +67,12 @@ deploy:
 		echo "$$i: built"; \
 	done; \
 	PKGDEST=packages makepkg -s; \
-	scp -r packages $(TARGET):/home/halosghost/; \
-	#ssh $(TARGET) sudo pacman -U packages/*; \
+	scp -P $(PORT) -r packages $(TARGET):/home/halosghost/; \
+	ssh -p $(PORT) $(TARGET); \
 	)
 
 uninstall:
 	@rm -rf -- $(MAINDIR)/{assets,media,pages,.well-known}
-	@rm -f  -- $(MAINDIR)/{$(PROGNM),hgredirector}{,.conf}
 	@rm -f  -- $(SVCDIR)/{$(PROGNM),hgredirector}.service
 	@rm -f  -- $(BINDIR)/website
 

@@ -4,65 +4,73 @@ usage () {
     printf "Usage: ./configure [options]\n\n"
     printf "Options:\n"
     printf "  --cc='COMP'       Use COMP for compiler (default: clang)\n"
-    printf "  --cflags='FLAGS'  Set CFLAGS (cf. Tuprules.tup for defaults)\n"
-    printf "  --file-max='BTS'  Set max file size to BTS Bytes (default: 67108864)\n"
-    printf "  --prefix='PATH'   Set prefix (default: '/usr/local')\n"
+    printf "  --cflags='FLAGS'  Set CFLAGS (cf. Makerules for defaults)\n"
+    printf "  --prefix='PATH'   Set PREFIX (default: /srv/http)\n"
     printf "  --reset-config    Reset configuration to the defaults\n"
 }
 
 check_file () {
     [[ -f "$1" ]] && fnd='\x1b[32mY' || fnd='\x1b[31m\x1b[1mN';
-    printf 'Found %-34s\t[ %b\x1b[0m ]\n' "$1:" "$fnd"
+    printf 'Found %-*s\t[ %b\x1b[0m ]\n' "$2" "$1:" "$fnd"
     [[ -f "$1" ]] || exit 1
 }
 
-def_cflags=(-g -O3 -fPIE -pie -Weverything -Werror -Wno-disabled-macro-expansion
-            -std=c11 -ggdb -D_FORTIFY_SOURCE=2 -fstack-protector-strong
-            -march=native --param=ssp-buffer-size=1 -Wl,-z,relro,-z,now -flto
-            -fsanitize=undefined -fsanitize-trap=undefined)
-
 check_deps () {
-    i_cc=$(show_tuprule CC | cut -d' ' -f3)
-    for i in make tup pkg-config "$(which "$i_cc")" mkdir install rm; do
-        [[ "$(which "$i" &> /dev/null; echo $?)" == 0 ]] && {
-            check_file "$(which "$i")"
-        } || check_file "$i"
+    i_cc=$(show_makerule CC | cut -d' ' -f3)
+    cur_cflags=($(grep --color=never CFLAGS Makerules | sed 's/CFLAGS = //'))
+
+    pushd ./src &> /dev/null
+    hdrs=($("$i_cc" -M common.h | sed -e 's|.*:||' -e 's|\\||' | tr -d '\n'))
+
+    len=0
+    for i in make "$i_cc" mkdir install rm "${hdrs[@]}" "$cur_cflags[@]"; do
+        if (( "${#i}" > len )); then
+            len="${#i}"
+        fi
     done
 
-    hdrs=(errno stdio stdlib unistd syslog string 'linux/limits' 'sys/stat'
-    'sys/types' stdbool 'lwan/lwan') # sql pastes routes)
+    for i in make pkg-config "$(which "$i_cc")" mkdir install rm; do
+        [[ "$(which "$i" &> /dev/null; echo $?)" == 0 ]] && {
+            check_file "$(which "$i")" "$len"
+        } || check_file "$i" "$len"
+    done
 
     for i in "${hdrs[@]}"; do
-        fh=$($i_cc -c -o tm -x c - <<< "#include <$i.h>" &> /dev/null; echo $?)
+        if [[ "$i" != *'.h' || "$i" == *'bits'*  || "$i" == *'curl/easy'* ]]; then
+            continue
+        fi
+
+        fh=$($i_cc -c -o tm -x c - <<< "#include \"$i\"" &> /dev/null; echo $?)
         [[ "$fh" == 0 ]] && {
             fnd='\x1b[32mY'; [[ -f "tm" ]] && rm -- tm
         } || fnd='\x1b[31m\x1b[1mN'
 
-        printf 'Found %-34s\t[ %b\x1b[0m ]\n' "$i.h:" "$fnd"
+        printf 'Found %-*s\t[ %b\x1b[0m ]\n' "$len" "$i:" "$fnd"
         [[ "$fh" != 0 ]] && exit 1
     done
+    popd &> /dev/null
 
-    for i in "${def_cflags[@]}"; do
+    for i in "${cur_cflags[@]}"; do
         fc=$($i_cc -c -o tm -x c - "$i" <<< "#include <time.h>" &> /dev/null; echo $?)
         [[ "$fc" == 0 ]] && {
             fnd='\x1b[32mY'; [[ -f "tm" ]] && rm -- tm
         } || fnd='\x1b[31m\x1b[1mN'
 
-        printf 'Found %-34s\t[ %b\x1b[0m ]\n' "$i:" "$fnd"
+        printf 'Found %-*s\t[ %b\x1b[0m ]\n' "$len" "$i:" "$fnd"
         [[ "$fc" != 0 ]] && exit 1
     done
 
-    for i in uuid ssl sqlite3 lwan; do
-        check_file "/usr/lib/lib$i.so"
+    for i in lwan; do
+        check_file "/usr/lib/lib$i.so" "$len"
     done
 }
 
-update_tuprule () {
-    sed -i ./Tuprules.tup -re "s/$1.*/$1 = $2/"
+update_makerule () {
+    sed -i ./Makerules -re "s/$1.*/$1 = $2/"
 }
 
 update () {
-    sed -i ./src/main.h -re "s|(define $1)(\\s*)(.*)$|\\1\\2$2|"
+    sed -i ./src/common.h -re "s|(define $1)(\s*)(.*)$|\\1\\2$2|"
 }
 
 update_makevar () {
@@ -71,39 +79,42 @@ update_makevar () {
 }
 
 default_config () {
-    update MAXSIZE '67108864'
-    update PREFIX '"/usr/local"'
-    update_makevar PREFIX '/usr/local'
-    update_tuprule CFLAGS "${def_cflags[*]}"
-    update_tuprule CC 'clang'
+    def_cflags=(-g -O3 -fPIE -pie -Weverything -Werror -std=gnu11 -ggdb -flto
+                -Wno-disabled-macro-expansion -Wno-used-but-marked-unused
+                -fstack-protector-strong -march=native -D_FORTIFY_SOURCE=2
+                --param=ssp-buffer-size=1 -Wl,-z,relro,-z,now
+                -fsanitize=undefined -fsanitize-trap=undefined)
+
+    update_makerule CFLAGS "${def_cflags[*]}"
+    update_makerule CC 'clang'
+    update_makevar  PREFIX '/srv/http'
+    update          PREFIX '"/srv/http"'
 }
 
-show_tuprule () {
-    grep --color=never "$1" ./Tuprules.tup
+show_makerule () {
+    grep --color=never "^$1" ./Makerules
 }
 
 show_value () {
     printf "$1: %s\n" \
-        "$('grep' "#define $2" ./src/main.h | sed -re "s/#define $2(\\s*)(.*)$/\\2/")"
+        "$('grep' "#define $2" ./src/common.h | sed -re "s/#define $2(\s*)(.*)$/\\2/")"
 }
 
 show_config () {
-    show_tuprule CFLAGS
-    show_tuprule CC
-    show_value 'Max File Size' MAXSIZE
-    show_value 'Prefix' PREFIX
+    show_makerule CFLAGS
+    show_makerule CC
+    show_value    PREFIX PREFIX
 }
 
 for i in "$@"; do
     case "$i" in
-        --cc=*)         update_tuprule CC "${i#*=}"; shift;;
-        --cflags=*)     update_tuprule CFLAGS "${i#*=}"; shift;;
-        --file-max=*)   update MAXSIZE "${i#*=}"; shift;;
-        --help)         usage; exit 0;;
+        --cc=*)         update_makerule CC "${i#*=}"; shift;;
+        --cflags=*)     update_makerule CFLAGS "${i#*=}"; shift;;
         --prefix=*)     pref="${i#*=}"
-                        update PREFIX "\"$pref\""
-                        update_makevar PREFIX "$pref"
+                        update          PREFIX "\"$pref\"";
+                        update_makevar  PREFIX "$pref";
                         shift;;
+        --help)         usage; exit 0;;
         --reset-config) default_config; break;;
     esac
 done
