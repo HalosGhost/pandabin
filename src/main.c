@@ -11,6 +11,7 @@ main (void) {
     lwan_straitjacket_enforce(&jacket);
 
     const struct lwan_url_map default_map [] = {
+        { .prefix = "/", .handler = LWAN_HANDLER_REF(index) },
         { .prefix = NULL }
     };
 
