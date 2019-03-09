@@ -1,4 +1,4 @@
-PROGNM  =  hgweb
+PROGNM  =  pandabin
 PREFIX  ?= /srv/http
 MAINDIR ?= $(DESTDIR)$(PREFIX)
 SVCDIR  ?= $(DESTDIR)/usr/lib/systemd/system/
@@ -8,20 +8,18 @@ PORT    ?= 2222
 
 include Makerules
 
-.PHONY: all bin clean complexity clang-analyze cov-build res minify install uninstall
+.PHONY: all bin clean complexity scan-build cov-build res minify install uninstall
 
-all: dist bin res minify
+all: dist bin
 
 bin: dist
 	@(cd src; \
-		$(CC) $(CFLAGS) $(LDFLAGS) $(SOURCES) -o ../dist/$(PROGNM) \
-	)
-	@(cd src; \
-		$(CC) $(CFLAGS) $(LDFLAGS) redirector.c -o ../dist/hgredirector \
+		$(CC) $(CFLAGS) $(LDFLAGS) $(SOURCES) -o ../dist/$(PROGNM); \
+		$(CC) $(CFLAGS) $(LDFLAGS) redirector.c -o ../dist/redirector \
 	)
 
-clang-analyze:
-	@(cd ./src; clang-check -analyze ./*.c)
+scan-build:
+	@scan-build --use-cc=$(CC) make bin
 
 clean:
 	@rm -rf -- dist cov-int $(PROGNM).tgz ./src/*.plist
