@@ -1,0 +1,4 @@
+post_install() {
+    mkdir -p /srv/http/.well-known/acme-challenge
+    chown -R http:http /srv/http
+}

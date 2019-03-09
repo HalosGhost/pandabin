@@ -1,0 +1,12 @@
+[Unit]
+Description=/srv/http/hgweb
+After=network.target
+
+[Service]
+PrivateTmp=true
+ExecStart=/usr/bin/website hgweb
+KillSignal=SIGINT
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

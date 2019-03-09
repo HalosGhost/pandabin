@@ -1,0 +1,13 @@
+[Unit]
+Description=/srv/http/hgredirector
+After=network.target
+Requires=hgweb.service
+
+[Service]
+PrivateTmp=true
+ExecStart=/usr/bin/website hgredirector
+KillSignal=SIGINT
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

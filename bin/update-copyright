@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+
+YEAR=$(date +"%Y")
+sed "s/&ndash;..../\&ndash;$YEAR/" -i /srv/http/pages/index.html

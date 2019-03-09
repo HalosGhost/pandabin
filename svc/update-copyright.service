@@ -1,0 +1,6 @@
+[Unit]
+Description=Update site copyright year
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/update-copyright

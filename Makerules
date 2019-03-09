@@ -1,0 +1,5 @@
+CC = clang
+CFLAGS = -g -O3 -fPIE -pie -Weverything -Werror -std=gnu11 -ggdb -flto -Wno-disabled-macro-expansion -Wno-used-but-marked-unused -fstack-protector-strong -march=native -D_FORTIFY_SOURCE=2 --param=ssp-buffer-size=1 -Wl,-z,relro,-z,now -fsanitize=undefined -fsanitize-trap=undefined
+LDFLAGS = `pkg-config --libs lwan`
+SOURCES = main.c
+VER = `git describe --long --tags`

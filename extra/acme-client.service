@@ -1,0 +1,7 @@
+[Unit]
+Description=Let's Encrypt Auto-Renew
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/acme-client -FvnNC /srv/http/.well-known/acme-challenge -a 'https://letsencrypt.org/documents/LE-SA-v1.2-November-15-2017.pdf' halosgho.st oceanus.halosgho.st
+ExecStart=/usr/bin/systemctl restart hitch.service

@@ -1,0 +1,9 @@
+[Unit]
+Description=Yearly Copyright Notice Update
+
+[Timer]
+OnCalendar=yearly
+Persistent=true
+
+[Install]
+WantedBy=timers.target
