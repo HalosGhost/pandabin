@@ -4,6 +4,7 @@
 #pragma once
 
 #include "common.h"
+#include "sql.h"
 
 static struct lwan_key_value headers [] = {
     { .key = "content-security-policy", .value = "default-src 'self'" },
