@@ -8,7 +8,7 @@ PORT    ?= 2222
 
 include Makerules
 
-.PHONY: all bin clean complexity scan-build cov-build res minify install uninstall
+.PHONY: all bin clean complexity scan-build cov-build install uninstall
 
 all: dist bin
 
@@ -23,7 +23,7 @@ scan-build:
 
 clean:
 	@rm -rf -- dist cov-int $(PROGNM).tgz ./src/*.plist
-	@rm -rf -- bld/{lwan-git,acme-client-git,hitch-git,pkg,src,packages,halosgho.st}
+	@rm -rf -- bld/{lwan-git,acme-client-git,hitch-git,pkg,src,packages,$(PROGNM)}
 
 complexity:
 	@complexity -h ./src/*
@@ -34,19 +34,6 @@ cov-build: clean dist
 
 dist:
 	@mkdir -p dist/.well-known/acme-challenge
-
-res: dist
-	@cp -a --no-preserve=ownership pages dist/
-	@cp -a --no-preserve=ownership media dist/
-	@cp -a --no-preserve=ownership assets dist/
-
-minify: res
-	@(cd dist; \
-	for i in assets/*.css pages/*.html; do \
-		mv "$$i" "$$i".bak; \
-		sed -E 's/^\s+//g' "$$i".bak | tr -d '\n' > "$$i"; \
-		rm "$$i".bak; \
-	done)
 
 install: all
 	@mkdir -p $(BINDIR) $(SVCDIR) $(MAINDIR)
@@ -70,8 +57,8 @@ deploy:
 	)
 
 uninstall:
-	@rm -rf -- $(MAINDIR)/{assets,media,pages,.well-known}
-	@rm -f  -- $(SVCDIR)/{$(PROGNM),hgredirector}.service
+	@rm -rf -- $(MAINDIR)/.well-known
+	@rm -f  -- $(SVCDIR)/{$(PROGNM),redirector}.service
 	@rm -f  -- $(BINDIR)/website
 
 include Makeeaster
