@@ -1,11 +1,11 @@
 [Unit]
-Description=/srv/http/hgredirector
+Description=/srv/http/redirector
 After=network.target
 Requires=hgweb.service
 
 [Service]
 PrivateTmp=true
-ExecStart=/usr/bin/website hgredirector
+ExecStart=/usr/bin/website redirector
 KillSignal=SIGINT
 Restart=always
 

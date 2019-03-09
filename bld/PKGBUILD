@@ -1,34 +1,34 @@
 # Maintainer: Sam Stuewe <samuel dot stuewe at gmail dot com>
 
-pkgname=hgweb-git
+pkgname=pandabin-git
 pkgver=0
 pkgrel=1
-pkgdesc='my website'
-url='https://github.com/HalosGhost/halosgho.st'
+pkgdesc='a small, simple pastebin'
+url='https://github.com/HalosGhost/pandabin'
 arch=('i686' 'x86_64')
-license=('GPL')
+license=('GPL3')
 depends=('hitch' 'acme-client' 'lwan')
 makedepends=('git')
-source=('git+https://github.com/HalosGhost/halosgho.st.git')
+source=('git+https://github.com/HalosGhost/pandabin.git')
 sha256sums=('SKIP')
-install='hgweb.install'
+install='pandabin.install'
 
 pkgver () {
-    cd halosgho.st
+    cd pandabin
     printf '0.r%s.%s' "$(git rev-list --count HEAD)" "$(git log -1 --pretty=format:%h)"
 }
 
 prepare () {
-    cd halosgho.st
+    cd pandabin
     ./configure
 }
 
 build () {
-    cd halosgho.st
+    cd pandabin
     make
 }
 
 package () {
-    cd halosgho.st
+    cd pandabin
     make DESTDIR="$pkgdir" install
 }

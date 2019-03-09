@@ -1,10 +1,10 @@
 [Unit]
-Description=/srv/http/hgweb
+Description=/srv/http/pandabin
 After=network.target
 
 [Service]
 PrivateTmp=true
-ExecStart=/usr/bin/website hgweb
+ExecStart=/usr/bin/website pandabin
 KillSignal=SIGINT
 Restart=always
 
