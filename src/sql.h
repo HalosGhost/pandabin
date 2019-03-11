@@ -10,7 +10,16 @@ static const char * pandabin_schema =
     "  ( 'uuid'    text    primary key"
     "  , 'size'    integer not null"
     "  , 'hash'    text    not null unique"
+    "  , 'sunset'  integer null"
+    "  , 'units'   text    null"
     "  , 'created' text    not null"
+    "  , 'views'   integer not null"
+    //"  , 'user'    text    not null"
+    //"  , foreign key (user) references users(user)"
+    "  );"
+
+    "create table if not exists 'users'"
+    "  ( 'user'    text    not null unique"
     "  );"
 
     "create table if not exists 'settings'"
