@@ -10,6 +10,7 @@ static const char * pandabin_schema =
     "  ( 'uuid'    text    primary key"
     "  , 'size'    integer not null"
     "  , 'hash'    text    not null unique"
+    "  , 'content' blob    not null"
     "  , 'sunset'  integer null"
     "  , 'units'   text    null"
     "  , 'created' text    not null"
