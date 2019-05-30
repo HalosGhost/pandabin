@@ -5,6 +5,7 @@ SVCDIR  ?= $(DESTDIR)/usr/lib/systemd/system/
 BINDIR  ?= $(DESTDIR)/usr/bin
 TARGET  ?= oceanus.halosgho.st
 PORT    ?= 2222
+MKDIR   ?= mkdir -p
 
 include Makerules
 
@@ -33,17 +34,17 @@ cov-build: clean dist
 	@tar czvf $(PROGNM).tgz cov-int
 
 dist:
-	@mkdir -p dist/.well-known/acme-challenge
+	@$(MKDIR) dist/.well-known/acme-challenge
 
 install: all
-	@mkdir -p $(BINDIR) $(SVCDIR) $(MAINDIR)
+	@$(MKDIR) $(BINDIR) $(SVCDIR) $(MAINDIR)
 	@cp -a --no-preserve=ownership dist/* $(MAINDIR)/
 	@cp -a --no-preserve=ownership svc/* $(SVCDIR)/
 	@install -m755 -t $(BINDIR) bin/*
 
 deploy:
 	@(pushd bld; \
-	mkdir -p packages; \
+	$(MKDIR) packages; \
 	for i in lwan-git hitch-git acme-client-git; do \
 		cower -df "$$i" --ignorerepo &> /dev/null; \
 		pushd "$$i"; \
